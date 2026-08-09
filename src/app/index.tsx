@@ -1,98 +1,81 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+/**
+ * Purpose: Collections screen — live list with item counts, entry point for
+ * creating a collection.
+ * Author(s): John Reed
+ */
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
+import { useQuery } from '@powersync/react';
+import { Link } from 'expo-router';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
+interface CollectionRow {
+  id: string;
+  name: string;
+  vertical: string;
+  item_count: number;
 }
 
-export default function HomeScreen() {
+export default function CollectionsScreen() {
+  const theme = useTheme();
+  const { data: collections } = useQuery<CollectionRow>(
+    `SELECT c.*, (SELECT COUNT(*) FROM items i WHERE i.collection_id = c.id) AS item_count
+     FROM collections c ORDER BY c.created_at DESC`
+  );
+
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
+      <FlatList
+        data={collections}
+        keyExtractor={(c) => c.id}
+        contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <ThemedText themeColor="textSecondary" style={styles.empty}>
+            No collections yet — start one below.
           </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
+        }
+        renderItem={({ item }) => (
+          <Link href={`/collection/${item.id}`} asChild>
+            <Pressable
+              style={[styles.card, { backgroundColor: theme.backgroundElement }]}
+            >
+              <View style={styles.cardText}>
+                <ThemedText type="subtitle">{item.name}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {item.vertical} · {item.item_count}{' '}
+                  {item.item_count === 1 ? 'item' : 'items'}
+                </ThemedText>
+              </View>
+            </Pressable>
+          </Link>
+        )}
+      />
+      <Link href="/collection/new" asChild>
+        <Pressable style={[styles.addButton, { backgroundColor: theme.backgroundSelected }]}>
+          <ThemedText type="subtitle">+ New Collection</ThemedText>
+        </Pressable>
+      </Link>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+  container: { flex: 1 },
+  list: { padding: 16, gap: 12 },
+  empty: { textAlign: 'center', marginTop: 48 },
+  card: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
+  cardText: { gap: 4 },
+  addButton: {
+    margin: 16,
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
   },
 });
