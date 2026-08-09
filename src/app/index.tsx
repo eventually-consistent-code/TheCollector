@@ -40,7 +40,10 @@ export default function CollectionsScreen() {
         renderItem={({ item }) => (
           <Link href={`/collection/${item.id}`} asChild>
             <Pressable
-              style={[styles.card, { backgroundColor: theme.backgroundElement }]}
+              style={StyleSheet.flatten([
+                styles.card,
+                { backgroundColor: theme.backgroundElement },
+              ])}
             >
               <View style={styles.cardText}>
                 <ThemedText type="subtitle">{item.name}</ThemedText>
@@ -54,7 +57,12 @@ export default function CollectionsScreen() {
         )}
       />
       <Link href="/collection/new" asChild>
-        <Pressable style={[styles.addButton, { backgroundColor: theme.backgroundSelected }]}>
+        <Pressable
+          style={StyleSheet.flatten([
+            styles.addButton,
+            { backgroundColor: theme.backgroundSelected },
+          ])}
+        >
           <ThemedText type="subtitle">+ New Collection</ThemedText>
         </Pressable>
       </Link>
