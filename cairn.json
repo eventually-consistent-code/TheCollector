@@ -1,0 +1,19 @@
+{
+  "tracker": {
+    "type": "github",
+    "config": { "repo": "eventually-consistent-code/TheCollector" }
+  },
+  "user": { "handle": "eventually-consistent-code", "mode": "vibe" },
+  "agents": { "model": "auto" },
+  "continuity": {
+    "resume": "prompt",
+    "checkpoint": true,
+    "wipCommits": false,
+    "recallIndex": { "enabled": true, "maxCards": 20 }
+  },
+  "leakGuard": {
+    "enabled": true,
+    "allow": [],
+    "extraPatterns": []
+  }
+}
