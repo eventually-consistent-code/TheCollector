@@ -1,0 +1,77 @@
+{
+  "lastScan": "2026-08-09T09:06:00.368Z",
+  "issues": {
+    "1": {
+      "title": "REQ-01: Collection/item CRUD on local-first PowerSync data layer (iOS/Android/web)",
+      "bodyHash": "dc86f09001fa9830",
+      "labels": [],
+      "state": "open",
+      "updatedAt": "2026-08-09T09:13:37Z"
+    },
+    "2": {
+      "title": "REQ-02: Required Supabase account — sign-up/sign-in gate on all three platforms",
+      "bodyHash": "2c793db33319c5d2",
+      "labels": [],
+      "state": "open",
+      "updatedAt": "2026-08-09T05:38:51Z"
+    },
+    "3": {
+      "title": "REQ-03: Cloud sync — PowerSync against Supabase Postgres with RLS",
+      "bodyHash": "70e954e10e15f148",
+      "labels": [],
+      "state": "open",
+      "updatedAt": "2026-08-09T09:13:45Z"
+    },
+    "4": {
+      "title": "REQ-04: Eight vertical templates with tailored fields",
+      "bodyHash": "c9a7f89888bd9f67",
+      "labels": [],
+      "state": "open",
+      "updatedAt": "2026-08-09T05:38:56Z"
+    },
+    "5": {
+      "title": "REQ-05: Metadata adapters per vertical behind one lookup interface",
+      "bodyHash": "fffb9824566cad06",
+      "labels": [],
+      "state": "open",
+      "updatedAt": "2026-08-09T05:39:00Z"
+    },
+    "6": {
+      "title": "REQ-06: Barcode/QR scan-to-add prefilling an item via the vertical's metadata adapter",
+      "bodyHash": "d122deea52de2013",
+      "labels": [],
+      "state": "open",
+      "updatedAt": "2026-08-09T05:39:03Z"
+    },
+    "7": {
+      "title": "REQ-07: Photos on items — capture, multiple images, thumbnails, Storage sync",
+      "bodyHash": "dd5c65f6ff4352f3",
+      "labels": [],
+      "state": "open",
+      "updatedAt": "2026-08-09T05:39:04Z"
+    },
+    "8": {
+      "title": "REQ-08: Search, filter, and sort across collections",
+      "bodyHash": "1ec3d8b8c186f223",
+      "labels": [],
+      "state": "open",
+      "updatedAt": "2026-08-09T05:39:06Z"
+    },
+    "9": {
+      "title": "REQ-09: Value tracking — purchase price, current value, totals, simple stats",
+      "bodyHash": "c662858cd415e933",
+      "labels": [],
+      "state": "open",
+      "updatedAt": "2026-08-09T05:39:07Z"
+    }
+  },
+  "phases": {
+    "1": "Phase 1: Foundation — app scaffold + local data layer",
+    "2": "Phase 2: Auth + cloud sync",
+    "3": "Phase 3: Vertical templates",
+    "4": "Phase 4: Photos",
+    "5": "Phase 5: Metadata adapters + barcode scan",
+    "6": "Phase 6: Search, filter, sort",
+    "7": "Phase 7: Value tracking + stats"
+  }
+}
