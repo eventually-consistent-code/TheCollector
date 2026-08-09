@@ -5,8 +5,9 @@
       "title": "REQ-01: Collection/item CRUD on local-first PowerSync data layer (iOS/Android/web)",
       "bodyHash": "dc86f09001fa9830",
       "labels": [],
-      "state": "open",
-      "updatedAt": "2026-08-09T09:13:37Z"
+      "assignee": "eventually-consistent-code",
+      "state": "in_progress",
+      "updatedAt": "2026-08-09T09:15:11Z"
     },
     "2": {
       "title": "REQ-02: Required Supabase account — sign-up/sign-in gate on all three platforms",
