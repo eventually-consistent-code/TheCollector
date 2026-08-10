@@ -6,8 +6,8 @@
       "bodyHash": "dc86f09001fa9830",
       "labels": [],
       "assignee": "eventually-consistent-code",
-      "state": "in_progress",
-      "updatedAt": "2026-08-09T09:15:11Z"
+      "state": "closed",
+      "updatedAt": "2026-08-10T02:53:42Z"
     },
     "2": {
       "title": "REQ-02: Required Supabase account — sign-up/sign-in gate on all three platforms",
