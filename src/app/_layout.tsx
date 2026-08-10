@@ -20,6 +20,10 @@ export default function RootLayout() {
   // Waits for the local db before dropping the splash — first query is free.
   useEffect(() => {
     db.init().finally(() => SplashScreen.hideAsync());
+    if (__DEV__) {
+      // Debug handle for dev-time inspection (e.g. CDP console).
+      (globalThis as Record<string, unknown>).__db = db;
+    }
   }, []);
 
   return (
