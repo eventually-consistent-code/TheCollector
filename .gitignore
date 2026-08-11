@@ -44,3 +44,6 @@ example
 
 # cairn session state
 .cairn/state/
+
+# env secrets
+.env
