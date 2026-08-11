@@ -47,3 +47,4 @@ example
 
 # env secrets
 .env
+supabase/.temp/
