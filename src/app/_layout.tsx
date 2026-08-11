@@ -12,11 +12,15 @@ import { useColorScheme } from 'react-native';
 
 import { SessionProvider, useSession } from '@/auth/session';
 import { db } from '@/db/database';
+import { useSyncLifecycle } from '@/db/sync';
 
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
   const { session, ready } = useSession();
+
+  // Adopt-then-connect whenever a session lands.
+  useSyncLifecycle(db, session);
 
   // Hold the splash until both the db and the initial session are known.
   useEffect(() => {

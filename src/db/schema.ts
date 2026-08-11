@@ -29,6 +29,7 @@ export type Vertical = (typeof VERTICALS)[number];
 // Tables use the default synced shape — no connector is attached in phase 1,
 // so writes queue locally; phase 2 attaches Supabase and they upload as-is.
 const collections = new Table({
+  user_id: column.text,
   name: column.text,
   vertical: column.text,
   created_at: column.text,
@@ -39,6 +40,7 @@ const collections = new Table({
 // custom_fields is a JSON blob owned by the vertical's template (phase 3).
 const items = new Table(
   {
+    user_id: column.text,
     collection_id: column.text,
     name: column.text,
     notes: column.text,

@@ -8,6 +8,7 @@ import { useQuery } from '@powersync/react';
 import { Link } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
+import { SyncStatusBar } from '@/components/sync-status';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/use-theme';
@@ -28,6 +29,7 @@ export default function CollectionsScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <SyncStatusBar />
       <FlatList
         data={collections}
         keyExtractor={(c) => c.id}

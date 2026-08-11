@@ -18,6 +18,8 @@ const now = () => new Date().toISOString();
 export interface CreateCollectionInput {
   name: string;
   vertical: Vertical;
+  // Owner — required for sync routing + RLS; from session.user.id.
+  userId: string;
 }
 
 // Creates a collection, returns its id.
@@ -28,9 +30,9 @@ export async function createCollection(
   const id = Crypto.randomUUID();
   const ts = now();
   await db.execute(
-    `INSERT INTO collections (id, name, vertical, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?)`,
-    [id, input.name, input.vertical, ts, ts]
+    `INSERT INTO collections (id, user_id, name, vertical, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [id, input.userId, input.name, input.vertical, ts, ts]
   );
   return id;
 }
@@ -73,18 +75,20 @@ export interface ItemFieldsInput {
 export async function createItem(
   db: AbstractPowerSyncDatabase,
   collectionId: string,
-  input: ItemFieldsInput
+  input: ItemFieldsInput,
+  userId: string
 ): Promise<string> {
   const id = Crypto.randomUUID();
   const ts = now();
   await db.execute(
     `INSERT INTO items
-       (id, collection_id, name, notes, acquired_at,
+       (id, user_id, collection_id, name, notes, acquired_at,
         purchase_price_cents, current_value_cents, custom_fields,
         created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       id,
+      userId,
       collectionId,
       input.name,
       input.notes ?? null,

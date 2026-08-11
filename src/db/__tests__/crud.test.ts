@@ -27,6 +27,8 @@ jest.mock('expo-crypto', () => ({
   randomUUID: () => require('crypto').randomUUID(),
 }));
 
+const U1 = 'user-one-uuid';
+
 let db: PowerSyncDatabase;
 let dir: string;
 
@@ -51,7 +53,7 @@ afterEach(async () => {
 
 describe('collections', () => {
   test('create and read back', async () => {
-    const id = await createCollection(db, { name: 'My Vinyl', vertical: 'vinyl' });
+    const id = await createCollection(db, { name: 'My Vinyl', vertical: 'vinyl', userId: U1 });
 
     const rows = await db.getAll<any>('SELECT * FROM collections');
     expect(rows).toHaveLength(1);
@@ -62,7 +64,7 @@ describe('collections', () => {
   });
 
   test('rename updates name and updated_at only', async () => {
-    const id = await createCollection(db, { name: 'Old', vertical: 'comics' });
+    const id = await createCollection(db, { name: 'Old', vertical: 'comics', userId: U1 });
     await renameCollection(db, id, 'New');
 
     const row = await db.get<any>('SELECT * FROM collections WHERE id = ?', [id]);
@@ -71,11 +73,11 @@ describe('collections', () => {
   });
 
   test('delete cascades items', async () => {
-    const keepId = await createCollection(db, { name: 'Keep', vertical: 'lego' });
-    const dropId = await createCollection(db, { name: 'Drop', vertical: 'funko' });
-    await createItem(db, keepId, { name: 'Kept item' });
-    await createItem(db, dropId, { name: 'Doomed 1' });
-    await createItem(db, dropId, { name: 'Doomed 2' });
+    const keepId = await createCollection(db, { name: 'Keep', vertical: 'lego', userId: U1 });
+    const dropId = await createCollection(db, { name: 'Drop', vertical: 'funko', userId: U1 });
+    await createItem(db, keepId, { name: 'Kept item' }, U1);
+    await createItem(db, dropId, { name: 'Doomed 1' }, U1);
+    await createItem(db, dropId, { name: 'Doomed 2' }, U1);
 
     await deleteCollection(db, dropId);
 
@@ -91,7 +93,7 @@ describe('items', () => {
   let collectionId: string;
 
   beforeEach(async () => {
-    collectionId = await createCollection(db, { name: 'Games', vertical: 'video-games' });
+    collectionId = await createCollection(db, { name: 'Games', vertical: 'video-games', userId: U1 });
   });
 
   test('create with full fields round-trips', async () => {
@@ -102,7 +104,7 @@ describe('items', () => {
       purchasePriceCents: 24999,
       currentValueCents: 32000,
       customFields: { platform: 'SNES', region: 'NTSC-U' },
-    });
+    }, U1);
 
     const row = await db.get<any>('SELECT * FROM items WHERE id = ?', [id]);
     expect(row.collection_id).toBe(collectionId);
@@ -115,7 +117,7 @@ describe('items', () => {
   });
 
   test('optional fields default to null', async () => {
-    const id = await createItem(db, collectionId, { name: 'Loose cart' });
+    const id = await createItem(db, collectionId, { name: 'Loose cart' }, U1);
 
     const row = await db.get<any>('SELECT * FROM items WHERE id = ?', [id]);
     expect(row.notes).toBeNull();
@@ -128,7 +130,7 @@ describe('items', () => {
     const id = await createItem(db, collectionId, {
       name: 'Earthbound',
       purchasePriceCents: 10000,
-    });
+    }, U1);
     await updateItem(db, id, { name: 'EarthBound', currentValueCents: 45000 });
 
     const row = await db.get<any>('SELECT * FROM items WHERE id = ?', [id]);
@@ -139,8 +141,8 @@ describe('items', () => {
   });
 
   test('delete removes only that item', async () => {
-    const a = await createItem(db, collectionId, { name: 'A' });
-    await createItem(db, collectionId, { name: 'B' });
+    const a = await createItem(db, collectionId, { name: 'A' }, U1);
+    await createItem(db, collectionId, { name: 'B' }, U1);
 
     await deleteItem(db, a);
 
