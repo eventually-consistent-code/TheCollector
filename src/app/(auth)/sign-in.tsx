@@ -61,7 +61,7 @@ export default function SignInScreen() {
           onPress={signIn}
           disabled={busy || !email.trim() || !password}
         />
-        <Link href="./sign-up" relativeToDirectory>
+        <Link href="./sign-up">
           <ThemedText type="link">No account? Create one</ThemedText>
         </Link>
       </ScrollView>

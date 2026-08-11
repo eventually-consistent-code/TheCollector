@@ -4,7 +4,7 @@
  * Author(s): John Reed
  */
 
-import type { AbstractPowerSyncDatabase } from '@powersync/common';
+import { SyncStreamConnectionMethod, type AbstractPowerSyncDatabase } from '@powersync/common';
 import type { Session } from '@supabase/supabase-js';
 import { useEffect, useRef } from 'react';
 
@@ -22,7 +22,12 @@ export function useSyncLifecycle(
 
   useEffect(() => {
     const userId = session?.user.id ?? null;
-    if (!userId || connectedFor.current === userId) {
+    if (!userId) {
+      // Signed out — allow a future re-connect (even for the same user).
+      connectedFor.current = null;
+      return;
+    }
+    if (connectedFor.current === userId) {
       return;
     }
     connectedFor.current = userId;
@@ -34,7 +39,11 @@ export function useSyncLifecycle(
           `adopted local data: ${adopted.collections} collections, ${adopted.items} items...`
         );
       }
-      await db.connect(new SupabaseConnector());
+      // WebSocket transport — RN's HTTP stream stalls (observed on Android
+      // emulator: connecting=true forever, no error). WS connects in ~1s.
+      await db.connect(new SupabaseConnector(), {
+        connectionMethod: SyncStreamConnectionMethod.WEB_SOCKET,
+      });
     })().catch((err) => {
       connectedFor.current = null;
       console.error('sync connect failed', err);

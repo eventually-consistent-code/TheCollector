@@ -21,11 +21,15 @@ export function SyncStatusBar() {
     : 'offline';
   const color = status.connected ? '#34A853' : '#9AA0A6';
 
+  const err =
+    status.dataFlowStatus.downloadError ?? status.dataFlowStatus.uploadError;
+
   return (
     <View style={styles.row}>
       <View style={[styles.dot, { backgroundColor: color }]} />
       <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
         {label}
+        {err ? ` — ${String(err).slice(0, 120)}` : ''}
       </ThemedText>
       <Pressable onPress={() => signOutAndClear(db)}>
         <ThemedText type="small" themeColor="textSecondary">
