@@ -4,6 +4,9 @@
 # connect. Deployed via the PowerSync dashboard.
 # ============================================================
 
+config:
+  edition: 3
+
 streams:
   user_collections:
     auto_subscribe: true
