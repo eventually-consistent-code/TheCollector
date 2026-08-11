@@ -1,0 +1,14 @@
+# ============================================================
+# TheCollector — PowerSync Sync Streams (phase 2)
+# Per-user streams; auto_subscribe = offline-first sync-all on
+# connect. Deployed via the PowerSync dashboard.
+# ============================================================
+
+streams:
+  user_collections:
+    auto_subscribe: true
+    query: SELECT * FROM collections WHERE user_id = auth.user_id()
+
+  user_items:
+    auto_subscribe: true
+    query: SELECT * FROM items WHERE user_id = auth.user_id()

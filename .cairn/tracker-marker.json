@@ -13,15 +13,17 @@
       "title": "REQ-02: Required Supabase account — sign-up/sign-in gate on all three platforms",
       "bodyHash": "2c793db33319c5d2",
       "labels": [],
-      "state": "open",
-      "updatedAt": "2026-08-09T05:38:51Z"
+      "assignee": "eventually-consistent-code",
+      "state": "in_progress",
+      "updatedAt": "2026-08-11T07:22:22Z"
     },
     "3": {
       "title": "REQ-03: Cloud sync — PowerSync against Supabase Postgres with RLS",
       "bodyHash": "70e954e10e15f148",
       "labels": [],
-      "state": "open",
-      "updatedAt": "2026-08-09T09:13:45Z"
+      "assignee": "eventually-consistent-code",
+      "state": "in_progress",
+      "updatedAt": "2026-08-11T07:22:24Z"
     },
     "4": {
       "title": "REQ-04: Eight vertical templates with tailored fields",

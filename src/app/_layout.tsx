@@ -1,6 +1,6 @@
 /**
- * Purpose: Root layout — PowerSync provider wrapping the router stack so
- * every screen can run reactive queries against the local db.
+ * Purpose: Root layout — session-gated routing. Signed out → (auth) group;
+ * signed in → (app) group wrapped in the PowerSync provider.
  * Author(s): John Reed
  */
 
@@ -10,16 +10,42 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { SessionProvider, useSession } from '@/auth/session';
 import { db } from '@/db/database';
 
 SplashScreen.preventAutoHideAsync();
 
+function RootNavigator() {
+  const { session, ready } = useSession();
+
+  // Hold the splash until both the db and the initial session are known.
+  useEffect(() => {
+    if (ready) {
+      SplashScreen.hideAsync();
+    }
+  }, [ready]);
+
+  if (!ready) {
+    return null;
+  }
+
+  return (
+    <Stack>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      </Stack.Protected>
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="(app)" options={{ headerShown: false }} />
+      </Stack.Protected>
+    </Stack>
+  );
+}
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
-  // Waits for the local db before dropping the splash — first query is free.
   useEffect(() => {
-    db.init().finally(() => SplashScreen.hideAsync());
+    db.init();
     if (__DEV__) {
       // Debug handle for dev-time inspection (e.g. CDP console).
       (globalThis as Record<string, unknown>).__db = db;
@@ -28,15 +54,11 @@ export default function RootLayout() {
 
   return (
     <PowerSyncContext.Provider value={db}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="index" options={{ title: 'Collections' }} />
-          <Stack.Screen name="collection/new" options={{ title: 'New Collection' }} />
-          <Stack.Screen name="collection/[id]/index" options={{ title: 'Collection' }} />
-          <Stack.Screen name="collection/[id]/new-item" options={{ title: 'New Item' }} />
-          <Stack.Screen name="item/[id]" options={{ title: 'Item' }} />
-        </Stack>
-      </ThemeProvider>
+      <SessionProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <RootNavigator />
+        </ThemeProvider>
+      </SessionProvider>
     </PowerSyncContext.Provider>
   );
 }
