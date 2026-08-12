@@ -3,7 +3,7 @@
 | Phase | Name | Status |
 |-------|------|--------|
 | 1 | Foundation — app scaffold + local data layer | verified |
-| 2 | Auth + cloud sync | pending |
+| 2 | Auth + cloud sync | verified |
 | 3 | Vertical templates | pending |
 | 4 | Photos | pending |
 | 5 | Metadata adapters + barcode scan | pending |
