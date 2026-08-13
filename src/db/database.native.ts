@@ -7,6 +7,7 @@
 
 import { PowerSyncDatabase } from '@powersync/react-native';
 
+import { createQuietLogger } from './logger';
 import { AppSchema } from './schema';
 
 export const db = new PowerSyncDatabase({
@@ -14,4 +15,5 @@ export const db = new PowerSyncDatabase({
   database: {
     dbFilename: 'thecollector.db',
   },
+  logger: createQuietLogger('PowerSync'),
 });

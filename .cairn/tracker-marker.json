@@ -67,6 +67,15 @@
       "labels": [],
       "state": "open",
       "updatedAt": "2026-08-09T05:39:07Z"
+    },
+    "10": {
+      "title": "PowerSync RSocket \"Closed / Stream end encountered\" console errors repeating (44×) on iOS after app left running — determine if sync self-heals (token-expiry reconnect noise) or connection is stuck in a dead loop",
+      "bodyHash": "e3b0c44298fc1c14",
+      "labels": [
+        "cairn:bug"
+      ],
+      "state": "open",
+      "updatedAt": "2026-08-13T05:53:46Z"
     }
   },
   "phases": {

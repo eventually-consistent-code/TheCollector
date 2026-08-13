@@ -7,6 +7,7 @@
 
 import { PowerSyncDatabase } from '@powersync/web';
 
+import { createQuietLogger } from './logger';
 import { AppSchema } from './schema';
 
 // Metro can't bundle workers, so point at the copied assets explicitly.
@@ -19,4 +20,5 @@ export const db = new PowerSyncDatabase({
   sync: {
     worker: '/@powersync/worker.js',
   },
+  logger: createQuietLogger('PowerSync'),
 });
