@@ -5,7 +5,7 @@
  * Author(s): John Reed
  */
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ScrollView } from 'react-native';
 
 import { ActionButton, Field } from '@/components/form';
@@ -23,11 +23,14 @@ export function ItemForm({
   initial,
   saveLabel,
   onSave,
+  footer,
 }: {
   template: Template;
   initial?: ItemRecord;
   saveLabel: string;
   onSave: (input: ItemFieldsInput) => void | Promise<void>;
+  // Extra content rendered above the save button (e.g. the photo section).
+  footer?: ReactNode;
 }) {
   const [name, setName] = useState(initial?.name ?? '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
@@ -88,6 +91,7 @@ export function ItemForm({
           <TemplateFields fields={template.fields} values={custom} onChange={setCustom} />
         </>
       )}
+      {footer}
       <ActionButton title={saveLabel} onPress={save} disabled={!name.trim()} />
     </ScrollView>
   );

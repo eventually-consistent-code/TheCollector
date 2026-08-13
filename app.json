@@ -26,6 +26,14 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "TheCollector uses your photo library so you can add pictures of your collectibles.",
+          "cameraPermission": "TheCollector uses the camera so you can photograph your collectibles.",
+          "microphonePermission": false
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",

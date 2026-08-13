@@ -8,8 +8,10 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
+import { useSession } from '@/auth/session';
 import { ActionButton } from '@/components/form';
 import { ItemForm } from '@/components/item-form';
+import { PhotoSection } from '@/components/photo-section';
 import { ThemedView } from '@/components/themed-view';
 import { deleteItem, updateItem } from '@/db/crud';
 import { useCollection, useItem } from '@/db/hooks';
@@ -18,6 +20,7 @@ import { templateFor } from '@/templates';
 export default function ItemScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = usePowerSync();
+  const { session } = useSession();
   const { data: rows } = useItem(id);
   const item = rows?.[0];
   const { data: collectionRows } = useCollection(item?.collection_id ?? undefined);
@@ -50,6 +53,9 @@ export default function ItemScreen() {
           await updateItem(db, item.id, input);
           router.back();
         }}
+        footer={
+          session ? <PhotoSection itemId={item.id} userId={session.user.id} /> : null
+        }
       />
       <View style={{ padding: 16 }}>
         <ActionButton
