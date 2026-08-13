@@ -1,6 +1,7 @@
 /**
- * Purpose: Shared item form — new-item and edit-item screens are the same
- * fields with different save wiring.
+ * Purpose: Shared item form — common fields plus the vertical template's
+ * custom fields. New-item and edit-item are the same fields with different
+ * save wiring.
  * Author(s): John Reed
  */
 
@@ -8,16 +9,22 @@ import { useState } from 'react';
 import { ScrollView } from 'react-native';
 
 import { ActionButton, Field } from '@/components/form';
+import { TemplateFields } from '@/components/template-fields';
+import { ThemedText } from '@/components/themed-text';
 import type { ItemFieldsInput } from '@/db/crud';
+import { parseCustomFields } from '@/db/crud';
 import type { ItemRecord } from '@/db/schema';
 import { centsToDisplay, displayToCents } from '@/lib/money';
+import type { FieldValues, Template } from '@/templates';
 
 // Pre-fills from an existing row when editing.
 export function ItemForm({
+  template,
   initial,
   saveLabel,
   onSave,
 }: {
+  template: Template;
   initial?: ItemRecord;
   saveLabel: string;
   onSave: (input: ItemFieldsInput) => void | Promise<void>;
@@ -35,6 +42,9 @@ export function ItemForm({
       ? centsToDisplay(initial.current_value_cents).slice(1)
       : ''
   );
+  const [custom, setCustom] = useState<FieldValues>(
+    () => parseCustomFields(initial?.custom_fields ?? null) as FieldValues
+  );
 
   const save = () =>
     onSave({
@@ -43,6 +53,7 @@ export function ItemForm({
       acquiredAt: acquiredAt.trim() || undefined,
       purchasePriceCents: displayToCents(purchase) ?? undefined,
       currentValueCents: displayToCents(value) ?? undefined,
+      customFields: Object.keys(custom).length ? custom : undefined,
     });
 
   return (
@@ -69,6 +80,14 @@ export function ItemForm({
         keyboardType="decimal-pad"
         placeholder="20.00"
       />
+      {template.fields.length > 0 && (
+        <>
+          <ThemedText type="subtitle" style={{ marginTop: 8, marginBottom: 12 }}>
+            {template.label} details
+          </ThemedText>
+          <TemplateFields fields={template.fields} values={custom} onChange={setCustom} />
+        </>
+      )}
       <ActionButton title={saveLabel} onPress={save} disabled={!name.trim()} />
     </ScrollView>
   );

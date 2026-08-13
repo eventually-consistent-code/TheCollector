@@ -8,20 +8,9 @@ import { column, Schema, Table } from '@powersync/common';
 
 // Constants
 
-// Verticals are placeholders until phase 3 lands real templates.
-export const VERTICALS = [
-  'trading-cards',
-  'comics',
-  'vinyl',
-  'video-games',
-  'movies',
-  'bourbon',
-  'lego',
-  'funko',
-  'other',
-] as const;
-
-export type Vertical = (typeof VERTICALS)[number];
+// Vertical ids live in the template registry (src/templates); the db layer
+// treats them as opaque strings.
+export type Vertical = string;
 
 // Tables
 

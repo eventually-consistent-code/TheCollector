@@ -12,10 +12,11 @@ import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ActionButton, Field } from '@/components/form';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { deleteCollection, renameCollection } from '@/db/crud';
+import { deleteCollection, parseCustomFields, renameCollection } from '@/db/crud';
 import { useCollection, useItems } from '@/db/hooks';
 import { useTheme } from '@/hooks/use-theme';
 import { centsToDisplay } from '@/lib/money';
+import { subtitleFor, templateFor, type FieldValues } from '@/templates';
 
 export default function CollectionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -80,23 +81,33 @@ export default function CollectionScreen() {
             Nothing cataloged yet.
           </ThemedText>
         }
-        renderItem={({ item }) => (
-          <Link href={`/item/${item.id}`} asChild>
-            <Pressable
-              style={StyleSheet.flatten([
-                styles.card,
-                { backgroundColor: theme.backgroundElement },
-              ])}
-            >
-              <ThemedText type="subtitle">{item.name}</ThemedText>
-              {item.current_value_cents != null && (
-                <ThemedText type="small" themeColor="textSecondary">
-                  {centsToDisplay(item.current_value_cents)}
-                </ThemedText>
-              )}
-            </Pressable>
-          </Link>
-        )}
+        renderItem={({ item }) => {
+          const template = templateFor(collection.vertical);
+          const subtitle = subtitleFor(
+            template,
+            parseCustomFields(item.custom_fields) as FieldValues
+          );
+          const line = [subtitle, item.current_value_cents != null ? centsToDisplay(item.current_value_cents) : null]
+            .filter(Boolean)
+            .join(' · ');
+          return (
+            <Link href={`/item/${item.id}`} asChild>
+              <Pressable
+                style={StyleSheet.flatten([
+                  styles.card,
+                  { backgroundColor: theme.backgroundElement },
+                ])}
+              >
+                <ThemedText type="subtitle">{item.name}</ThemedText>
+                {line !== '' && (
+                  <ThemedText type="small" themeColor="textSecondary">
+                    {line}
+                  </ThemedText>
+                )}
+              </Pressable>
+            </Link>
+          );
+        }}
       />
       <View style={styles.footer}>
         <Link href={`/collection/${collection.id}/new-item`} asChild>

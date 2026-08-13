@@ -13,13 +13,13 @@ import { useSession } from '@/auth/session';
 import { ActionButton, ChipPicker, Field } from '@/components/form';
 import { ThemedView } from '@/components/themed-view';
 import { createCollection } from '@/db/crud';
-import { VERTICALS, type Vertical } from '@/db/schema';
+import { VERTICAL_IDS } from '@/templates';
 
 export default function NewCollectionScreen() {
   const db = usePowerSync();
   const { session } = useSession();
   const [name, setName] = useState('');
-  const [vertical, setVertical] = useState<Vertical>('other');
+  const [vertical, setVertical] = useState('other');
 
   const save = async () => {
     if (!session) {
@@ -45,9 +45,9 @@ export default function NewCollectionScreen() {
         />
         <ChipPicker
           label="Vertical"
-          options={VERTICALS}
+          options={VERTICAL_IDS}
           value={vertical}
-          onChange={(v) => setVertical(v as Vertical)}
+          onChange={setVertical}
         />
         <ActionButton title="Create" onPress={save} disabled={!name.trim()} />
       </ScrollView>

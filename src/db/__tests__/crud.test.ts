@@ -169,3 +169,24 @@ describe('parseCustomFields', () => {
     expect(parseCustomFields(raw as string | null)).toEqual(expected);
   });
 });
+
+describe('custom_fields round-trip (template values)', () => {
+  test('mixed types survive create and update', async () => {
+    const cid = await createCollection(db, { name: 'Vinyl', vertical: 'vinyl', userId: U1 });
+    const values = {
+      artist: 'Pink Floyd',
+      release_year: 1973,
+      media_condition: 'NM',
+      sleeve_condition: 'VG+',
+      store_pick: true,
+    };
+    const id = await createItem(db, cid, { name: 'DSOTM', customFields: values }, U1);
+
+    let row = await db.get<any>('SELECT custom_fields FROM items WHERE id = ?', [id]);
+    expect(parseCustomFields(row.custom_fields)).toEqual(values);
+
+    await updateItem(db, id, { name: 'DSOTM', customFields: { artist: 'Pink Floyd' } });
+    row = await db.get<any>('SELECT custom_fields FROM items WHERE id = ?', [id]);
+    expect(parseCustomFields(row.custom_fields)).toEqual({ artist: 'Pink Floyd' });
+  });
+});

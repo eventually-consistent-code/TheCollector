@@ -12,13 +12,16 @@ import { ActionButton } from '@/components/form';
 import { ItemForm } from '@/components/item-form';
 import { ThemedView } from '@/components/themed-view';
 import { deleteItem, updateItem } from '@/db/crud';
-import { useItem } from '@/db/hooks';
+import { useCollection, useItem } from '@/db/hooks';
+import { templateFor } from '@/templates';
 
 export default function ItemScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = usePowerSync();
   const { data: rows } = useItem(id);
   const item = rows?.[0];
+  const { data: collectionRows } = useCollection(item?.collection_id ?? undefined);
+  const template = templateFor(collectionRows?.[0]?.vertical);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   if (!item) {
@@ -40,6 +43,7 @@ export default function ItemScreen() {
       <ItemForm
         // Remount the form if another writer changes this row underneath us.
         key={item.updated_at ?? item.id}
+        template={template}
         initial={item}
         saveLabel="Save"
         onSave={async (input) => {
