@@ -30,8 +30,8 @@
       "bodyHash": "c9a7f89888bd9f67",
       "labels": [],
       "assignee": "eventually-consistent-code",
-      "state": "in_progress",
-      "updatedAt": "2026-08-13T03:25:58Z"
+      "state": "closed",
+      "updatedAt": "2026-08-13T03:36:33Z"
     },
     "5": {
       "title": "REQ-05: Metadata adapters per vertical behind one lookup interface",
