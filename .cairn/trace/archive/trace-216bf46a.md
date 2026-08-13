@@ -1,7 +1,8 @@
 ---
-status: open
+status: resolved
 issue: 10
 created: 2026-08-13
+resolved: 2026-08-13
 ---
 # Trace: PowerSync RSocket "Closed / Stream end encountered" console errors repeating (44×) on iOS after app left running — determine if sync self-heals (token-expiry reconnect noise) or connection is stuck in a dead loop
 
@@ -13,3 +14,9 @@ H1 (likely): periodic server-side stream close (Supabase token expiry ~1h and/or
 
 ## test — 2026-08-13
 Relaunched app with Metro up: status went straight to synced, both collections present. H1 CONFIRMED — connection establishes cleanly; the overnight errors were periodic server-side stream closes (~every 12 min avg: token expiry + service keepalives) each followed by successful reconnect. H2 (idle-deactivated instance) ruled out. Defect reduces to log noise: the SDK logs an expected/recoverable RSocket close at error level, which LogBox surfaces as a red console error. Fix: custom logger on the PowerSync db that downgrades the known-benign RSocket close message to warn; everything else passes through.
+
+## verdict — 2026-08-13
+Cause: PowerSync service periodically closes the WebSocket sync stream (hourly Supabase token expiry + service keepalives); the SDK reconnects automatically within seconds, but logs each close at error level — 44 red LogBox errors over an overnight session, zero actual downtime (relaunch test: instant synced). Fix: custom PowerSyncLogger downgrading the known-benign RSocket close messages (RSocket error…Closed / Stream end encountered) to warn, wired into both platform db setups; real errors pass through untouched; unit-tested. Commit 76956a6.
+
+## resolution — 2026-08-13
+Self-healing reconnect noise, not an outage. Log severity fixed in 76956a6 (benign RSocket closes → warn); offline status indicator still catches any real failure.
