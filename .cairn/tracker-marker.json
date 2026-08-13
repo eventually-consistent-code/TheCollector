@@ -52,8 +52,8 @@
       "bodyHash": "dd5c65f6ff4352f3",
       "labels": [],
       "assignee": "eventually-consistent-code",
-      "state": "in_progress",
-      "updatedAt": "2026-08-13T20:28:52Z"
+      "state": "closed",
+      "updatedAt": "2026-08-13T20:56:53Z"
     },
     "8": {
       "title": "REQ-08: Search, filter, and sort across collections",
