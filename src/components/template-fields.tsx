@@ -4,6 +4,7 @@
  * Author(s): John Reed
  */
 
+import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { ChipPicker, Field } from '@/components/form';
@@ -68,20 +69,7 @@ function TemplateField({
         />
       );
     case 'money':
-      return (
-        <Field
-          label={`${def.label} ($)`}
-          value={
-            typeof value === 'number' ? centsToDisplay(value).slice(1) : String(value ?? '')
-          }
-          onChangeText={(t) => {
-            const cents = displayToCents(t);
-            onChange(cents === null ? (t.trim() === '' ? undefined : t) : cents);
-          }}
-          keyboardType="decimal-pad"
-          placeholder={def.placeholder ?? '12.34'}
-        />
-      );
+      return <MoneyField def={def} value={value} onChange={onChange} />;
     case 'date':
       return (
         <Field
@@ -101,6 +89,35 @@ function TemplateField({
         />
       );
   }
+}
+
+// Money edits keep raw text locally — reformatting per keystroke mangles
+// typing ("5.01.99"). Cents land in values; text is what the user sees.
+function MoneyField({
+  def,
+  value,
+  onChange,
+}: {
+  def: FieldDef;
+  value: FieldValues[string] | undefined;
+  onChange: (v: FieldValues[string] | undefined) => void;
+}) {
+  const [text, setText] = useState(() =>
+    typeof value === 'number' ? centsToDisplay(value).slice(1) : String(value ?? '')
+  );
+  return (
+    <Field
+      label={`${def.label} ($)`}
+      value={text}
+      onChangeText={(t) => {
+        setText(t);
+        const cents = displayToCents(t);
+        onChange(cents === null ? undefined : cents);
+      }}
+      keyboardType="decimal-pad"
+      placeholder={def.placeholder ?? '12.34'}
+    />
+  );
 }
 
 // The whole template section.
