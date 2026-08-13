@@ -15,3 +15,7 @@ streams:
   user_items:
     auto_subscribe: true
     query: SELECT * FROM items WHERE user_id = auth.user_id()
+
+  user_photos:
+    auto_subscribe: true
+    query: SELECT * FROM photos WHERE user_id = auth.user_id()

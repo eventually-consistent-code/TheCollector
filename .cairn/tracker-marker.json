@@ -51,8 +51,9 @@
       "title": "REQ-07: Photos on items — capture, multiple images, thumbnails, Storage sync",
       "bodyHash": "dd5c65f6ff4352f3",
       "labels": [],
-      "state": "open",
-      "updatedAt": "2026-08-09T05:39:04Z"
+      "assignee": "eventually-consistent-code",
+      "state": "in_progress",
+      "updatedAt": "2026-08-13T20:28:52Z"
     },
     "8": {
       "title": "REQ-08: Search, filter, and sort across collections",

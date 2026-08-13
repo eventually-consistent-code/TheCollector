@@ -11,6 +11,7 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/auth/client';
 import { adoptLocalData } from './adopt';
 import { SupabaseConnector } from './connector';
+import { startPhotoSync, stopPhotoSync } from './photos';
 
 // Connects sync whenever a session is present. Adoption runs BEFORE the
 // first connect so pre-auth rows upload under the new owner.
@@ -44,6 +45,7 @@ export function useSyncLifecycle(
       await db.connect(new SupabaseConnector(), {
         connectionMethod: SyncStreamConnectionMethod.WEB_SOCKET,
       });
+      await startPhotoSync(db);
     })().catch((err) => {
       connectedFor.current = null;
       console.error('sync connect failed', err);
@@ -54,6 +56,7 @@ export function useSyncLifecycle(
 // Sign-out sequence: disconnect + wipe local data (next user must not see
 // this user's rows), then end the Supabase session (flips the route guard).
 export async function signOutAndClear(db: AbstractPowerSyncDatabase) {
+  await stopPhotoSync();
   await db.disconnectAndClear();
   await supabase.auth.signOut();
 }
