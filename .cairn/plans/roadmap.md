@@ -4,7 +4,7 @@
 |-------|------|--------|
 | 1 | Foundation — app scaffold + local data layer | verified |
 | 2 | Auth + cloud sync | verified |
-| 3 | Vertical templates | pending |
+| 3 | Vertical templates | verified |
 | 4 | Photos | pending |
 | 5 | Metadata adapters + barcode scan | pending |
 | 6 | Search, filter, sort | pending |
