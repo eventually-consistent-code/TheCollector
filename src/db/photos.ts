@@ -47,7 +47,16 @@ class SupabaseRemoteStorage implements RemoteStorageAdapter {
     if (error) {
       throw error;
     }
-    return data.arrayBuffer();
+    // Hermes Blobs have no arrayBuffer(); FileReader works everywhere.
+    if (typeof data.arrayBuffer === 'function') {
+      return data.arrayBuffer();
+    }
+    return new Promise<ArrayBuffer>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsArrayBuffer(data);
+    });
   }
 
   async deleteFile(attachment: AttachmentRecord) {
@@ -81,8 +90,14 @@ export function getPhotoQueue(db: AbstractPowerSyncDatabase): AttachmentQueue {
       }
     },
     errorHandler: {
-      onDownloadError: async (_attachment, error) => shouldRetryDownload(error),
-      onUploadError: async () => true,
+      onDownloadError: async (attachment, error) => {
+        console.warn('photo download error', attachment.filename, String(error));
+        return shouldRetryDownload(error);
+      },
+      onUploadError: async (attachment, error) => {
+        console.warn('photo upload error', attachment.filename, String(error));
+        return true;
+      },
       onDeleteError: async () => true,
     },
   });

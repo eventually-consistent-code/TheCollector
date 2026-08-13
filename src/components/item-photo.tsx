@@ -27,15 +27,20 @@ export function ItemPhoto({ localUri, size }: { localUri: string | null; size: n
     let url: string | null = null;
     let cancelled = false;
     (async () => {
-      try {
-        const buf = await getPhotoQueue(db).localStorage.readFile(localUri);
-        if (cancelled) {
+      // The queue/adapter may still be initializing at first mount — retry
+      // briefly instead of silently giving up (placeholder-forever bug).
+      for (let attempt = 0; attempt < 6 && !cancelled; attempt++) {
+        try {
+          const buf = await getPhotoQueue(db).localStorage.readFile(localUri);
+          if (cancelled) {
+            return;
+          }
+          url = URL.createObjectURL(new Blob([buf], { type: 'image/jpeg' }));
+          setWebUrl(url);
           return;
+        } catch {
+          await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
         }
-        url = URL.createObjectURL(new Blob([buf], { type: 'image/jpeg' }));
-        setWebUrl(url);
-      } catch {
-        // File not local yet — placeholder stays up.
       }
     })();
     return () => {
