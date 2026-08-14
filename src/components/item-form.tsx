@@ -6,7 +6,7 @@
  */
 
 import { useState, type ReactNode } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 
 import { ActionButton, Field } from '@/components/form';
 import { TagEditor } from '@/components/tag-chips';
@@ -15,6 +15,8 @@ import { ThemedText } from '@/components/themed-text';
 import type { ItemFieldsInput } from '@/db/crud';
 import { parseCustomFields, parseTags } from '@/db/crud';
 import type { ItemRecord } from '@/db/schema';
+// Money values render in Geist with the amber tint — the ledger's ink.
+import { FontFamily, Palette, Spacing } from '@/constants/theme';
 import { centsToDisplay, displayToCents } from '@/lib/money';
 import type { FieldValues, Template } from '@/templates';
 
@@ -68,7 +70,7 @@ export function ItemForm({
     });
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16 }}>
+    <ScrollView contentContainerStyle={{ padding: Spacing.three }}>
       <Field label="Name" value={name} onChangeText={setName} autoFocus={!initial} />
       <Field label="Notes" value={notes} onChangeText={setNotes} multiline />
       <Field
@@ -83,6 +85,7 @@ export function ItemForm({
         onChangeText={setPurchase}
         keyboardType="decimal-pad"
         placeholder="12.34"
+        style={styles.money}
       />
       <Field
         label="Current value ($)"
@@ -90,6 +93,7 @@ export function ItemForm({
         onChangeText={setValue}
         keyboardType="decimal-pad"
         placeholder="20.00"
+        style={styles.money}
       />
       <TagEditor tags={tags} onChange={setTags} />
       {template.fields.length > 0 && (
@@ -105,3 +109,7 @@ export function ItemForm({
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  money: { fontFamily: FontFamily.sansMedium, color: Palette.amber },
+});

@@ -9,6 +9,8 @@ import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { ChipPicker, Field } from '@/components/form';
 import { ThemedText } from '@/components/themed-text';
+// Money values render in Geist with the amber tint — the ledger's ink.
+import { FontFamily, Palette, Type } from '@/constants/theme';
 import { centsToDisplay, displayToCents } from '@/lib/money';
 import type { FieldDef, FieldValues } from '@/templates';
 
@@ -44,7 +46,7 @@ function TemplateField({
     case 'boolean':
       return (
         <View style={styles.switchRow}>
-          <ThemedText type="smallBold" themeColor="textSecondary" style={styles.switchLabel}>
+          <ThemedText themeColor="textSecondary" style={styles.switchLabel}>
             {def.label}
           </ThemedText>
           <Switch value={value === true} onValueChange={(v) => onChange(v)} />
@@ -116,6 +118,7 @@ function MoneyField({
       }}
       keyboardType="decimal-pad"
       placeholder={def.placeholder ?? '12.34'}
+      style={styles.money}
     />
   );
 }
@@ -161,6 +164,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
   },
-  switchLabel: { flex: 1 },
+  switchLabel: { flex: 1, ...Type.label },
   clear: { marginTop: -10, marginBottom: 12, alignSelf: 'flex-end' },
+  money: { fontFamily: FontFamily.sansMedium, color: Palette.amber },
 });

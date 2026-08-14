@@ -6,12 +6,18 @@
 
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 
 import { supabase } from '@/auth/client';
 import { ActionButton, Field } from '@/components/form';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Spacing } from '@/constants/theme';
+
+// Constants
+
+// Semantic error red — deliberate local, not a palette token.
+const ERROR_RED = '#D93025';
 
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
@@ -34,7 +40,10 @@ export default function SignInScreen() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <ThemedText type="title" style={styles.wordmark}>
+          The Collector
+        </ThemedText>
         <Field
           label="Email"
           value={email}
@@ -52,7 +61,7 @@ export default function SignInScreen() {
           autoComplete="current-password"
         />
         {error && (
-          <ThemedText type="small" style={{ color: '#D93025', marginBottom: 12 }}>
+          <ThemedText type="small" style={styles.error}>
             {error}
           </ThemedText>
         )}
@@ -68,3 +77,14 @@ export default function SignInScreen() {
     </ThemedView>
   );
 }
+
+const styles = StyleSheet.create({
+  content: { padding: Spacing.three },
+  // Serif wordmark — the study's nameplate.
+  wordmark: {
+    textAlign: 'center',
+    marginTop: Spacing.five,
+    marginBottom: Spacing.five,
+  },
+  error: { color: ERROR_RED, marginBottom: 12 },
+});
