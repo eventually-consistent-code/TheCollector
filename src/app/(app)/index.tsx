@@ -11,6 +11,7 @@ import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SyncStatusBar } from '@/components/sync-status';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { FontFamily, Spacing, Type } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 interface CollectionRow {
@@ -53,17 +54,20 @@ export default function CollectionsScreen() {
         }
         renderItem={({ item }) => (
           <Link href={`/collection/${item.id}`} asChild>
+            {/* Collector's-tray card — raised slate, brass hairline, serif name. */}
             <Pressable
               style={StyleSheet.flatten([
                 styles.card,
-                { backgroundColor: theme.backgroundElement },
+                { backgroundColor: theme.surfaceRaised, borderColor: theme.hairline },
               ])}
             >
               <View style={styles.cardText}>
-                <ThemedText type="subtitle">{item.name}</ThemedText>
-                <ThemedText type="small" themeColor="textSecondary">
-                  {item.vertical} · {item.item_count}{' '}
-                  {item.item_count === 1 ? 'item' : 'items'}
+                <ThemedText themeColor="textSecondary" style={Type.label}>
+                  {item.vertical}
+                </ThemedText>
+                <ThemedText style={styles.cardName}>{item.name}</ThemedText>
+                <ThemedText themeColor="textSecondary" style={Type.data}>
+                  {item.item_count} {item.item_count === 1 ? 'item' : 'items'}
                 </ThemedText>
               </View>
             </Pressable>
@@ -74,10 +78,10 @@ export default function CollectionsScreen() {
         <Pressable
           style={StyleSheet.flatten([
             styles.addButton,
-            { backgroundColor: theme.backgroundSelected },
+            { backgroundColor: theme.accent },
           ])}
         >
-          <ThemedText type="subtitle">+ New Collection</ThemedText>
+          <ThemedText style={styles.buttonText}>+ New Collection</ThemedText>
         </Pressable>
       </Link>
     </ThemedView>
@@ -86,18 +90,21 @@ export default function CollectionsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  list: { padding: 16, gap: 12 },
-  empty: { textAlign: 'center', marginTop: 48 },
+  list: { padding: Spacing.three, gap: Spacing.three },
+  empty: { textAlign: 'center', marginTop: Spacing.six },
+  // 8px card radius + 1px hairline per the Estate & Ember system.
   card: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: Spacing.four,
   },
-  cardText: { gap: 4 },
+  cardText: { gap: Spacing.one },
+  cardName: { ...Type.title },
   addButton: {
-    margin: 16,
-    borderRadius: 12,
-    padding: 16,
+    margin: Spacing.three,
+    borderRadius: 8,
+    padding: Spacing.three,
     alignItems: 'center',
   },
+  buttonText: { ...Type.body, fontFamily: FontFamily.sansSemiBold },
 });
