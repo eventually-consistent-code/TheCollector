@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from '@powersync/react';
-import { Link } from 'expo-router';
+import { Link, Stack } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
 import { SyncStatusBar } from '@/components/sync-status';
@@ -29,6 +29,18 @@ export default function CollectionsScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <Stack.Screen
+        options={{
+          // Header entry point into cross-collection search.
+          headerRight: () => (
+            <Link href="/search" asChild>
+              <Pressable hitSlop={8}>
+                <ThemedText type="link">Search</ThemedText>
+              </Pressable>
+            </Link>
+          ),
+        }}
+      />
       <SyncStatusBar />
       <FlatList
         data={collections}
