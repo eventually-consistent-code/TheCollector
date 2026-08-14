@@ -9,10 +9,11 @@ import { useState, type ReactNode } from 'react';
 import { ScrollView } from 'react-native';
 
 import { ActionButton, Field } from '@/components/form';
+import { TagEditor } from '@/components/tag-chips';
 import { TemplateFields } from '@/components/template-fields';
 import { ThemedText } from '@/components/themed-text';
 import type { ItemFieldsInput } from '@/db/crud';
-import { parseCustomFields } from '@/db/crud';
+import { parseCustomFields, parseTags } from '@/db/crud';
 import type { ItemRecord } from '@/db/schema';
 import { centsToDisplay, displayToCents } from '@/lib/money';
 import type { FieldValues, Template } from '@/templates';
@@ -53,6 +54,7 @@ export function ItemForm({
       ? (parseCustomFields(initial.custom_fields) as FieldValues)
       : (prefill?.customFields ?? {})
   );
+  const [tags, setTags] = useState<string[]>(() => parseTags(initial?.tags ?? null));
 
   const save = () =>
     onSave({
@@ -62,6 +64,7 @@ export function ItemForm({
       purchasePriceCents: displayToCents(purchase) ?? undefined,
       currentValueCents: displayToCents(value) ?? undefined,
       customFields: Object.keys(custom).length ? custom : undefined,
+      tags: tags.length ? tags : undefined,
     });
 
   return (
@@ -88,6 +91,7 @@ export function ItemForm({
         keyboardType="decimal-pad"
         placeholder="20.00"
       />
+      <TagEditor tags={tags} onChange={setTags} />
       {template.fields.length > 0 && (
         <>
           <ThemedText type="subtitle" style={{ marginTop: 8, marginBottom: 12 }}>

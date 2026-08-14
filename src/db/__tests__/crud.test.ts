@@ -16,7 +16,9 @@ import {
   createItem,
   deleteCollection,
   deleteItem,
+  normalizeTags,
   parseCustomFields,
+  parseTags,
   renameCollection,
   updateItem,
 } from '../crud';
@@ -205,5 +207,71 @@ describe('custom_fields round-trip (template values)', () => {
 
     const row = await db.get<any>('SELECT custom_fields FROM items WHERE id = ?', [id]);
     expect(parseCustomFields(row.custom_fields)).toEqual(values);
+  });
+});
+
+describe('tags', () => {
+  let collectionId: string;
+
+  beforeEach(async () => {
+    collectionId = await createCollection(db, { name: 'Comics', vertical: 'comics', userId: U1 });
+  });
+
+  test('create with tags round-trips normalized', async () => {
+    const id = await createItem(db, collectionId, {
+      name: 'ASM #300',
+      // Messy on purpose — normalization happens on the way in.
+      tags: ['  Key Issue ', 'venom', 'VENOM', '', 'graded'],
+    }, U1);
+
+    const row = await db.get<any>('SELECT tags FROM items WHERE id = ?', [id]);
+    expect(parseTags(row.tags)).toEqual(['key issue', 'venom', 'graded']);
+  });
+
+  test('update overwrites tags; omitting them clears to null', async () => {
+    const id = await createItem(db, collectionId, { name: 'Hulk #181', tags: ['key'] }, U1);
+
+    await updateItem(db, id, { name: 'Hulk #181', tags: ['wolverine', 'key'] });
+    let row = await db.get<any>('SELECT tags FROM items WHERE id = ?', [id]);
+    expect(parseTags(row.tags)).toEqual(['wolverine', 'key']);
+
+    // update writes the full field set — cleared tags go null, like the rest.
+    await updateItem(db, id, { name: 'Hulk #181' });
+    row = await db.get<any>('SELECT tags FROM items WHERE id = ?', [id]);
+    expect(row.tags).toBeNull();
+    expect(parseTags(row.tags)).toEqual([]);
+  });
+
+  test('old rows without tags parse to empty array', async () => {
+    const id = await createItem(db, collectionId, { name: 'Pre-tags item' }, U1);
+
+    const row = await db.get<any>('SELECT tags FROM items WHERE id = ?', [id]);
+    expect(row.tags).toBeNull();
+    expect(parseTags(row.tags)).toEqual([]);
+  });
+});
+
+describe('parseTags', () => {
+  test.each([
+    [null, []],
+    ['', []],
+    ['not json', []],
+    ['{"a":1}', []],
+    ['[1,"vinyl",null]', ['vinyl']],
+    ['["vinyl","rare"]', ['vinyl', 'rare']],
+  ])('%p → %p', (raw, expected) => {
+    expect(parseTags(raw as string | null)).toEqual(expected);
+  });
+});
+
+describe('normalizeTags', () => {
+  test.each([
+    [['  Rare  '], ['rare']],
+    [['VINYL', 'vinyl', 'Vinyl'], ['vinyl']],
+    [['', '   ', 'ok'], ['ok']],
+    [['b', 'a', 'B'], ['b', 'a']],
+    [[], []],
+  ])('%p → %p', (input, expected) => {
+    expect(normalizeTags(input)).toEqual(expected);
   });
 });
