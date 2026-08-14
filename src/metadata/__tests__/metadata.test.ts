@@ -230,6 +230,59 @@ describe('lego adapter', () => {
   });
 });
 
+// CardSight (trading cards, proxied)
+
+describe('trading-cards adapter — cardsight', () => {
+  const { tradingCardsAdapter } = require('../adapters/trading-cards');
+
+  beforeEach(() => {
+    // Keyless direct sources (Scryfall, Pokémon) offline for these tests —
+    // a failed source contributes nothing, never throws the whole search.
+    global.fetch = jest.fn().mockRejectedValue(new Error('down')) as unknown as typeof fetch;
+  });
+
+  it('maps cardsight results onto template fields', async () => {
+    invoke.mockResolvedValue({
+      data: {
+        results: [
+          {
+            type: 'card',
+            id: 'uuid-1',
+            name: 'Aaron Judge',
+            relevance: 9.9,
+            year: '2023',
+            setName: 'Topps Chrome',
+            parallelName: 'Refractor',
+            numberedTo: 25,
+          },
+          { type: 'set', id: 'uuid-2', name: 'Topps Chrome', relevance: 5 },
+        ],
+      },
+      error: null,
+    });
+
+    const results = await tradingCardsAdapter.searchByText('aaron judge /25');
+
+    // Set-type results filtered out; only the card survives.
+    expect(results).toHaveLength(1);
+    expect(results[0].title).toBe('Aaron Judge');
+    expect(results[0].source).toBe('CardSight');
+    expect(results[0].fields).toEqual({
+      set_name: 'Topps Chrome',
+      variant: 'Refractor /25',
+    });
+    expect(invoke).toHaveBeenCalledWith('metadata', {
+      body: { source: 'cardsight', op: 'search', params: { q: 'aaron judge /25' } },
+    });
+  });
+
+  it('still returns results when cardsight is down', async () => {
+    invoke.mockResolvedValue({ data: null, error: new Error('no key deployed') });
+
+    await expect(tradingCardsAdapter.searchByText('pikachu')).resolves.toEqual([]);
+  });
+});
+
 // Scan capability decision
 
 describe('canCameraScan', () => {

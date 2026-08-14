@@ -61,3 +61,20 @@
 {"ts":"2026-08-14T08:07:08.999Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
 {"ts":"2026-08-14T08:07:10.388Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
 {"ts":"2026-08-14T08:07:11.733Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
+{"ts":"2026-08-14T08:07:20.205Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"git add -A && git status --short | head -25 && git commit -m \"P5 T1-T6: metadata","error":false}
+{"ts":"2026-08-14T08:07:30.028Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"gh issue comment 5 --body \"Parked pending deploy: all code for this issue is on ","error":false}
+{"ts":"2026-08-14T08:12:10.689Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"gh issue create --title \"Add cardsight.ai to phase 5 — trading card DB/API\" --la","error":false}
+{"ts":"2026-08-14T08:12:16.755Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"gh label create \"cairn:backlog\" --color \"ededed\" --description \"cairn backlog ca","error":false}
+{"ts":"2026-08-14T08:14:28.185Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"BASE=$(git rev-parse --short HEAD) && echo \"base: $BASE\" && gh issue edit 11 --a","error":false}
+{"ts":"2026-08-14T08:16:28.041Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/supabase/functions/metadata/index.ts","error":false}
+{"ts":"2026-08-14T08:16:29.457Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/supabase/functions/metadata/index.ts","error":false}
+{"ts":"2026-08-14T08:16:31.269Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/proxy.ts","error":false}
+{"ts":"2026-08-14T08:16:40.029Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/trading-cards.ts","error":false}
+{"ts":"2026-08-14T08:16:54.928Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/trading-cards.ts","error":false}
+{"ts":"2026-08-14T08:17:07.970Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/__tests__/metadata.test.ts","error":false}
+{"ts":"2026-08-14T08:17:08.812Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/supabase/functions/.env.example","error":false}
+{"ts":"2026-08-14T08:17:13.621Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
+{"ts":"2026-08-14T08:17:16.500Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
+{"ts":"2026-08-14T08:17:20.839Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/CONTEXT.md","error":false}
+{"ts":"2026-08-14T08:17:26.108Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/DEPLOY.md","error":false}
+{"ts":"2026-08-14T08:17:32.008Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx tsc --noEmit && echo \"tsc clean\" && npx jest --silent 2>&1 | tail -5","error":false}

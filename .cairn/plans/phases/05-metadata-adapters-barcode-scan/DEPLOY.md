@@ -23,6 +23,7 @@ SQL editor (project bbvuyrcuowcmgjtwyqoz), or `psql "$DB_URL" -f supabase/metada
 | `TMDB_ACCESS_TOKEN` | themoviedb.org/settings/api — API Read Access Token |
 | `COMICVINE_API_KEY` | comicvine.gamespot.com/api — free key |
 | `REBRICKABLE_API_KEY` | rebrickable.com/api — free key |
+| `CARDSIGHT_API_KEY` | cardsight.ai — free tier 750 calls/mo |
 
 UPCitemdb trial tier needs no key (100 lookups/day, cached in upc_cache).
 

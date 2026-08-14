@@ -13,7 +13,14 @@ import { supabase } from '@/auth/client';
 
 // Sources the edge function routes on (keep in lockstep with
 // supabase/functions/metadata/index.ts).
-export type ProxySource = 'discogs' | 'igdb' | 'tmdb' | 'comicvine' | 'rebrickable' | 'upc';
+export type ProxySource =
+  | 'discogs'
+  | 'igdb'
+  | 'tmdb'
+  | 'comicvine'
+  | 'rebrickable'
+  | 'cardsight'
+  | 'upc';
 
 export interface ProxyRequest {
   source: ProxySource;

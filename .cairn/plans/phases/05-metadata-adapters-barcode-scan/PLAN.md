@@ -1,5 +1,5 @@
 ---
-issues: [5, 6]
+issues: [5, 6, 11]
 depth: standard
 ---
 # Phase 5: Metadata adapters + barcode scan — Plan
@@ -36,6 +36,10 @@ then adapters, then scan UI on top.
       result→field mapping per adapter, upc_cache hit short-circuit,
       edge-function routing (request shaping), scan fallback decision
       (BarcodeDetector present/absent). (#5, #6)
+- [x] T8 — CardSight (adopted #11): `cardsight` source in the metadata edge
+      function (`/v1/catalog/search`, X-API-Key server-side), merged into the
+      trading-cards adapter ahead of Pokémon/Scryfall — covers the
+      sports-card gap. `CARDSIGHT_API_KEY` added to secrets checklist. (#11)
 - [ ] T7 — Verify: scan a real UPC on Android + iOS dev client → prefilled
       item; web Chromium scan + web Safari manual-entry fallback; Discogs
       barcode path end-to-end; keyed sources return data through the proxy

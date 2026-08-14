@@ -34,3 +34,8 @@
 - **Sports cards, and any vertical with no barcode hit**: scan falls back to
   template-driven manual entry prefilled with whatever the bridge returned
   (title at minimum).
+- **CardSight (added mid-phase, #11)**: cardsight.ai `/v1/catalog/search`
+  joins the trading-cards adapter — cross-TCG + sports (12M+ cards), fuzzy
+  search, keyed (`X-API-Key`) so it rides the edge-function proxy. Free tier
+  750 calls/mo. Text search only this phase; its AI image-identify endpoint
+  is a future candidate (pairs naturally with the phase-4 camera work).

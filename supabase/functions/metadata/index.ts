@@ -98,6 +98,20 @@ async function igdb(params: Record<string, string>, retried = false): Promise<Re
   return json(await response.json());
 }
 
+// CardSight — cross-TCG + sports card catalog (12M+ cards), fuzzy search.
+async function cardsight(params: Record<string, string>): Promise<Response> {
+  const url = new URL('https://api.cardsight.ai/v1/catalog/search');
+  url.searchParams.set('q', params.q ?? '');
+  url.searchParams.set('type', 'card');
+  url.searchParams.set('take', '15');
+
+  const response = await fetch(url, {
+    headers: { 'X-API-Key': env('CARDSIGHT_API_KEY'), 'User-Agent': USER_AGENT },
+  });
+  if (!response.ok) return fail(`cardsight ${response.status}`, response.status);
+  return json(await response.json());
+}
+
 async function tmdb(params: Record<string, string>): Promise<Response> {
   const url = new URL('https://api.themoviedb.org/3/search/movie');
   url.searchParams.set('query', params.q ?? '');
@@ -199,6 +213,8 @@ Deno.serve(async (request) => {
         return await discogs(op, params);
       case 'igdb':
         return await igdb(params);
+      case 'cardsight':
+        return await cardsight(params);
       case 'tmdb':
         return await tmdb(params);
       case 'comicvine':

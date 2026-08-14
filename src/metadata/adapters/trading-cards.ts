@@ -1,13 +1,15 @@
 /**
- * Purpose: Trading cards adapter — Scryfall (MTG) + Pokémon TCG API, both
- * keyless and called direct from the client. Cards carry no barcodes, so
- * this is text-search only; sports cards stay manual entry.
+ * Purpose: Trading cards adapter — CardSight (cross-TCG + sports, 12M+
+ * cards, keyed → proxied) merged with Scryfall (MTG) and Pokémon TCG API
+ * (both keyless, direct). Cards carry no barcodes, so this is text-search
+ * only — CardSight finally covers the sports-card gap.
  * Author(s): John Reed
  */
 
 import type { FieldValues } from '@/templates/types';
 
 import { directGet } from '../fetch';
+import { callMetadata } from '../proxy';
 import type { MetadataAdapter, MetadataResult } from '../types';
 
 // Constants
@@ -76,22 +78,72 @@ function mapPokemon(card: PokemonCard): MetadataResult {
   };
 }
 
+// CardSight
+
+interface CardSightResult {
+  type: string; // card | set | release | parallel
+  name: string;
+  year?: string;
+  setName?: string;
+  releaseName?: string;
+  manufacturerName?: string;
+  parallelName?: string;
+  numberedTo?: number;
+}
+
+interface CardSightSearchResponse {
+  results: CardSightResult[];
+}
+
+function mapCardSight(card: CardSightResult): MetadataResult {
+  const fields: FieldValues = {};
+  const set = card.setName ?? card.releaseName;
+  if (set) fields.set_name = set;
+  // Parallel is CardSight's variant concept; "/25" rides along when numbered.
+  if (card.parallelName) {
+    fields.variant = card.numberedTo
+      ? `${card.parallelName} /${card.numberedTo}`
+      : card.parallelName;
+  }
+
+  return {
+    title: card.name,
+    subtitle: [card.year, set].filter(Boolean).join(' · '),
+    fields,
+    source: 'CardSight',
+  };
+}
+
 // Main
 
 export const tradingCardsAdapter: MetadataAdapter = {
   templateId: 'trading-cards',
 
   async searchByText(query) {
-    const encoded = encodeURIComponent(query.trim());
+    const trimmed = query.trim();
+    const encoded = encodeURIComponent(trimmed);
 
-    // Both sources in parallel; either failing (404 on no Scryfall match is
-    // routine) just contributes nothing.
-    const [scryfall, pokemon] = await Promise.allSettled([
+    // All three in parallel; any one failing (404 on no Scryfall match is
+    // routine, CardSight needs its key deployed) just contributes nothing.
+    const [cardsight, scryfall, pokemon] = await Promise.allSettled([
+      callMetadata<CardSightSearchResponse>({
+        source: 'cardsight',
+        op: 'search',
+        params: { q: trimmed },
+      }),
       directGet<ScryfallSearchResponse>(`${SCRYFALL_SEARCH}?q=${encoded}`),
       directGet<PokemonSearchResponse>(`${POKEMON_SEARCH}?q=name:"${encoded}*"&pageSize=${MAX_PER_SOURCE}`),
     ]);
 
     const results: MetadataResult[] = [];
+    if (cardsight.status === 'fulfilled') {
+      results.push(
+        ...(cardsight.value.results ?? [])
+          .filter((r) => r.type === 'card')
+          .slice(0, MAX_PER_SOURCE)
+          .map(mapCardSight)
+      );
+    }
     if (pokemon.status === 'fulfilled') {
       results.push(...(pokemon.value.data ?? []).slice(0, MAX_PER_SOURCE).map(mapPokemon));
     }
