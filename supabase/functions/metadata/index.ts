@@ -8,6 +8,8 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
+import { cachedSearch } from './lookup_cache.ts';
+
 // Constants
 
 const USER_AGENT = 'TheCollector/0.1 +https://github.com/eventually-consistent-code/TheCollector';
@@ -39,6 +41,24 @@ function env(name: string): string {
   const value = Deno.env.get(name);
   if (!value) throw new Error(`missing secret: ${name}`);
   return value;
+}
+
+// Service-role client — bypasses RLS; the only path to the cache tables.
+function adminClient() {
+  return createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'));
+}
+
+// Write-through text-query cache: check lookup_cache, hit upstream at most
+// once, store forever. Upcoming adapters (books, art, timepieces, cigars)
+// wrap their upstream fetch in this instead of calling out directly — the
+// fetcher must throw on failure so a bad response is never cached.
+async function cachedSource(
+  source: string,
+  query: string,
+  fetcher: (normalized: string) => Promise<unknown>,
+): Promise<Response> {
+  const { payload } = await cachedSearch(adminClient(), source, query, fetcher);
+  return json(payload);
 }
 
 // Sources
@@ -165,7 +185,7 @@ async function upcBridge(params: Record<string, string>): Promise<Response> {
   const upc = params.upc ?? '';
   if (!/^\d{8,14}$/.test(upc)) return fail('bad upc', 400);
 
-  const admin = createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'));
+  const admin = adminClient();
 
   const { data: cached } = await admin
     .from('upc_cache')
