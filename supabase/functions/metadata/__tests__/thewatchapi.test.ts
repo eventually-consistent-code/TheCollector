@@ -8,10 +8,12 @@
 
 import { type LookupCacheDb } from '../lookup_cache';
 import {
+  extractReference,
   isBarcodeQuery,
   stripNoise,
   timepiecesSearch,
   LIMIT_MESSAGE,
+  REFINE_MESSAGE,
   UNAVAILABLE_MESSAGE,
   type TimepiecesDeps,
 } from '../thewatchapi';
@@ -102,6 +104,20 @@ describe('stripNoise', () => {
   });
 });
 
+describe('extractReference', () => {
+  it('finds plain and dotted reference numbers', () => {
+    expect(extractReference('Rolex 126234')).toBe('126234');
+    expect(extractReference('Omega 310.30.42.50.01.001 Moonwatch')).toBe('310.30.42.50.01.001');
+    expect(extractReference('casio dw5600e-1v')).toBe('dw5600e-1v');
+  });
+
+  it('ignores calibres, years, and plain words', () => {
+    expect(extractReference('Omega Speedmaster 3861')).toBeNull();
+    expect(extractReference('vintage elgin 1924')).toBeNull();
+    expect(extractReference('rolex submariner')).toBeNull();
+  });
+});
+
 // Reference/text search
 
 describe('timepiecesSearch — text', () => {
@@ -117,9 +133,33 @@ describe('timepiecesSearch — text', () => {
     expect(url.origin + url.pathname).toBe('https://api.thewatchapi.com/v1/model/search');
     expect(url.searchParams.get('api_token')).toBe('TEST_TOKEN');
     expect(url.searchParams.get('search')).toBe('rolex submariner');
-    expect(url.searchParams.get('search_attributes')).toBe('brand,model,reference_number,description');
+    // No reference token in the query → model-scoped search (the free tier
+    // rejects broad multi-attribute searches with too_many_results).
+    expect(url.searchParams.get('search_attributes')).toBe('model');
     expect(result).toEqual(payload);
     expect(deps.upserts).toEqual([{ source: 'timepieces', query: 'rolex submariner', payload }]);
+  });
+
+  it('reference-looking queries search the reference_number attribute alone', async () => {
+    const payload = { data: [{ brand: 'Rolex', reference_number: '126234' }] };
+    const fetchFn = fakeFetch(200, payload);
+    const deps = makeDeps({ fetchFn: fetchFn as unknown as typeof fetch });
+
+    await timepiecesSearch('Rolex 126234', deps);
+
+    const url = requestedUrl(fetchFn);
+    expect(url.searchParams.get('search')).toBe('126234');
+    expect(url.searchParams.get('search_attributes')).toBe('reference_number');
+  });
+
+  it('too_many_results degrades to an in-band refine message and never caches', async () => {
+    const fetchFn = fakeFetch(400, { error: { code: 'too_many_results', message: 'refine' } });
+    const deps = makeDeps({ fetchFn: fetchFn as unknown as typeof fetch });
+
+    const result = await timepiecesSearch('omega speedmaster', deps);
+
+    expect(result).toEqual({ data: [], refine: true, message: REFINE_MESSAGE });
+    expect(deps.upserts).toEqual([]);
   });
 
   it('second identical query is a cache hit — no second upstream call', async () => {
@@ -145,7 +185,10 @@ describe('timepiecesSearch — barcode', () => {
     await timepiecesSearch('079767891404', deps);
 
     expect(resolveUpc).toHaveBeenCalledWith('079767891404');
-    expect(requestedUrl(fetchFn).searchParams.get('search')).toBe('casio g-shock dw5600e-1v resin');
+    // The stripped title carries a reference token (DW5600E-1V) — the search
+    // scopes down to it for the free tier's exact-match sweet spot.
+    expect(requestedUrl(fetchFn).searchParams.get('search')).toBe('dw5600e-1v');
+    expect(requestedUrl(fetchFn).searchParams.get('search_attributes')).toBe('reference_number');
   });
 
   it('unknown barcode degrades to a friendly miss without an upstream call', async () => {
