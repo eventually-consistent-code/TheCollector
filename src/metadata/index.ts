@@ -7,6 +7,7 @@
  */
 
 import { bourbonAdapter } from './adapters/bourbon';
+import { cigarsAdapter } from './adapters/cigars';
 import { comicsAdapter } from './adapters/comics';
 import { funkoAdapter } from './adapters/funko';
 import { legoAdapter } from './adapters/lego';
@@ -33,6 +34,7 @@ const ADAPTERS: Record<string, MetadataAdapter> = {
   bourbon: bourbonAdapter,
   lego: legoAdapter,
   funko: funkoAdapter,
+  cigars: cigarsAdapter,
   // 'other' intentionally absent — manual entry only.
 };
 
