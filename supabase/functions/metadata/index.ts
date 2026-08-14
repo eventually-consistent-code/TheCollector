@@ -8,6 +8,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
+import { artSearch } from './art.ts';
 import { cachedSearch } from './lookup_cache.ts';
 
 // Constants
@@ -243,6 +244,10 @@ Deno.serve(async (request) => {
         return await comicvine(params);
       case 'rebrickable':
         return await rebrickable(op, params);
+      case 'art':
+        return await cachedSource('art', params.q ?? '', (normalized) =>
+          artSearch(normalized, fetch),
+        );
       case 'upc':
         return await upcBridge(params);
       default:
