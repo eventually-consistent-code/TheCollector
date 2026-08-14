@@ -21,6 +21,7 @@ export type ProxySource =
   | 'rebrickable'
   | 'cardsight'
   | 'art'
+  | 'books'
   | 'upc';
 
 export interface ProxyRequest {

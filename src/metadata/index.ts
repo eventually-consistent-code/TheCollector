@@ -7,6 +7,7 @@
  */
 
 import { artAdapter } from './adapters/art';
+import { booksAdapter } from './adapters/books';
 import { bourbonAdapter } from './adapters/bourbon';
 import { comicsAdapter } from './adapters/comics';
 import { funkoAdapter } from './adapters/funko';
@@ -35,8 +36,9 @@ const ADAPTERS: Record<string, MetadataAdapter> = {
   lego: legoAdapter,
   funko: funkoAdapter,
   art: artAdapter,
+  books: booksAdapter,
   // 'other' intentionally absent — manual entry only.
-  // 'timepieces' / 'cigars' / 'books' also absent BY DESIGN
+  // 'timepieces' / 'cigars' also absent BY DESIGN
   // (phase 5.5) — no lookup source earns its keep for these yet.
 };
 
