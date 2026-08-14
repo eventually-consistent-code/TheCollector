@@ -102,7 +102,7 @@ const X = (key: string) =>
   `(CASE WHEN json_valid(custom_fields) THEN json_extract(custom_fields, '$.${key}') END)`;
 
 const TAG_CLAUSE =
-  `(items.tags IS NOT NULL AND EXISTS ` +
+  `(json_valid(items.tags) AND EXISTS ` +
   `(SELECT 1 FROM json_each(items.tags) WHERE json_each.value = ?))`;
 
 describe('compileFilters', () => {
@@ -158,7 +158,7 @@ describe('compileFilters', () => {
     expect(out.params).toEqual([1999]);
   });
 
-  test('tags compile to NULL-guarded EXISTS, lowercased, one per tag', () => {
+  test('tags compile to json_valid-guarded EXISTS, lowercased, one per tag', () => {
     const out = compileFilters(DEFS, { tags: ['Rare', 'graded'] });
     expect(out.sql).toBe(`${TAG_CLAUSE} AND ${TAG_CLAUSE}`);
     expect(out.params).toEqual(['rare', 'graded']);

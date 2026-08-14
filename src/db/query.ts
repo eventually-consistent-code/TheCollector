@@ -176,11 +176,12 @@ export function compileFilters(
     }
   }
 
-  // Tag filters — one EXISTS per tag, all must match. NULL-guarded because
-  // items created before tagging shipped carry NULL tags.
+  // Tag filters — one EXISTS per tag, all must match. json_valid-guarded:
+  // items created before tagging shipped carry NULL tags, and json_each
+  // hard-errors on NULL/''/garbage instead of quietly matching nothing.
   for (const tag of state.tags ?? []) {
     clauses.push(
-      `(items.tags IS NOT NULL AND EXISTS ` +
+      `(json_valid(items.tags) AND EXISTS ` +
         `(SELECT 1 FROM json_each(items.tags) WHERE json_each.value = ?))`
     );
     params.push(tag.toLowerCase());
@@ -188,3 +189,57 @@ export function compileFilters(
 
   return { sql: clauses.join(' AND '), params };
 }
+
+//*************************************************************************
+// Collection item list — filter + sort in one statement
+//*************************************************************************
+
+// Everything the collection screen's filter bar can layer onto its list:
+// compiled template/tag filters plus an item-level current-value range
+// (current_value_cents is a real column, not a template field).
+export interface ItemListFilter {
+  compiled?: CompiledFilter;
+  value?: NumberRange;
+}
+
+// Full SELECT for one collection's item list with filters + sort applied.
+// Pure — collectionId rides in params, never in the SQL string. No filter
+// argument compiles to the exact query useItems has always run.
+export function buildItemsQuery(
+  collectionId: string | null,
+  sort: ItemSort,
+  filter?: ItemListFilter
+): { sql: string; params: unknown[] } {
+  const clauses = ['collection_id = ?'];
+  const params: unknown[] = [collectionId];
+
+  // Value range first, compiled fragment last — params track clause order.
+  if (filter?.value?.min !== undefined) {
+    clauses.push('current_value_cents >= ?');
+    params.push(filter.value.min);
+  }
+  if (filter?.value?.max !== undefined) {
+    clauses.push('current_value_cents <= ?');
+    params.push(filter.value.max);
+  }
+  if (filter?.compiled && filter.compiled.sql !== '') {
+    clauses.push(`(${filter.compiled.sql})`);
+    params.push(...filter.compiled.params);
+  }
+
+  const sql =
+    `SELECT * FROM items WHERE ${clauses.join(' AND ')} ` +
+    `ORDER BY ${orderByFor(sort)}`;
+  return { sql, params };
+}
+
+// Distinct tags across one collection's items, alphabetical — feeds the
+// filter bar's tag chips. One param: collection id. The subquery drops
+// NULL/malformed tags BEFORE json_each ever sees them; rows created before
+// tagging shipped carry NULL.
+export const DISTINCT_TAGS_SQL =
+  `SELECT DISTINCT json_each.value AS tag ` +
+  `FROM (SELECT tags FROM items WHERE collection_id = ? ` +
+  `AND tags IS NOT NULL AND json_valid(tags)) AS tagged, ` +
+  `json_each(tagged.tags) ` +
+  `ORDER BY tag`;

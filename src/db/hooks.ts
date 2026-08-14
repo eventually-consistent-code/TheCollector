@@ -6,8 +6,14 @@
 
 import { useQuery, usePowerSync } from '@powersync/react';
 
-import { buildSearchQuery, orderByFor, DEFAULT_SORT } from './query';
-import type { ItemSort } from './query';
+import {
+  buildItemsQuery,
+  buildSearchQuery,
+  orderByFor,
+  DEFAULT_SORT,
+  DISTINCT_TAGS_SQL,
+} from './query';
+import type { ItemListFilter, ItemSort } from './query';
 import type { CollectionRecord, ItemRecord } from './schema';
 
 // Re-export so screens have one import surface for the live db.
@@ -62,4 +68,22 @@ export function useSearchItems(query: string) {
 // One item by id.
 export function useItem(id: string | undefined) {
   return useQuery<ItemRecord>(`SELECT * FROM items WHERE id = ?`, [id ?? null]);
+}
+
+// Items within a collection with the filter bar's compiled state applied —
+// identical rows to useItems when no filter is passed. Kept separate so
+// useItems and its call sites stay untouched.
+export function useFilteredItems(
+  collectionId: string | undefined,
+  sort: ItemSort = DEFAULT_SORT,
+  filter?: ItemListFilter
+) {
+  const built = buildItemsQuery(collectionId ?? null, sort, filter);
+  return useQuery<ItemRecord>(built.sql, built.params);
+}
+
+// Distinct tags present in one collection's items, alphabetical — the filter
+// bar's tag chips come from here.
+export function useCollectionTags(collectionId: string | undefined) {
+  return useQuery<{ tag: string }>(DISTINCT_TAGS_SQL, [collectionId ?? null]);
 }

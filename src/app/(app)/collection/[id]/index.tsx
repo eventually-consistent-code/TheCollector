@@ -1,19 +1,26 @@
 /**
- * Purpose: Collection detail — live item list, inline rename, delete with
- * confirm, add-item entry point.
+ * Purpose: Collection detail — live item list with template-driven filters
+ * and sort, inline rename, delete with confirm, add-item entry point.
  * Author(s): John Reed
  */
 
 import { usePowerSync } from '@powersync/react';
 import { Link, Stack, router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
 import { ActionButton, Field } from '@/components/form';
+import { ItemFilterBar } from '@/components/item-filter-bar';
+import {
+  EMPTY_FILTER_STATE,
+  toItemListFilter,
+  type ItemFilterState,
+} from '@/components/item-filter-state';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { deleteCollection, parseCustomFields, renameCollection } from '@/db/crud';
-import { useCollection, useItems } from '@/db/hooks';
+import { useCollection, useCollectionTags, useFilteredItems, useItems } from '@/db/hooks';
+import { DEFAULT_SORT, type ItemSort } from '@/db/query';
 import { useTheme } from '@/hooks/use-theme';
 import { centsToDisplay } from '@/lib/money';
 import { getAdapter } from '@/metadata';
@@ -24,11 +31,23 @@ export default function CollectionScreen() {
   const db = usePowerSync();
   const theme = useTheme();
   const { data: collectionRows } = useCollection(id);
-  const { data: items } = useItems(id);
   const collection = collectionRows?.[0];
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  // Filter + sort state feeds the query layer; the list re-runs reactively.
+  const [sort, setSort] = useState<ItemSort>(DEFAULT_SORT);
+  const [filterState, setFilterState] = useState<ItemFilterState>(EMPTY_FILTER_STATE);
+  const template = templateFor(collection?.vertical);
+  const listFilter = useMemo(
+    () => toItemListFilter(template, filterState),
+    [template, filterState]
+  );
+  const { data: items } = useFilteredItems(id, sort, listFilter);
+  // Unfiltered count for the "N of M" line.
+  const { data: allItems } = useItems(id);
+  const { data: tagRows } = useCollectionTags(id);
 
   if (!collection) {
     return <ThemedView style={styles.container} />;
@@ -75,15 +94,29 @@ export default function CollectionScreen() {
                 </ThemedText>
               </Pressable>
             )}
+            {/* Filter bar only earns its space once there is something to filter. */}
+            {(allItems?.length ?? 0) > 0 && (
+              <ItemFilterBar
+                template={template}
+                sort={sort}
+                onSort={setSort}
+                state={filterState}
+                onState={setFilterState}
+                tags={(tagRows ?? []).map((r) => r.tag)}
+                shown={items?.length ?? 0}
+                total={allItems?.length ?? 0}
+              />
+            )}
           </View>
         }
         ListEmptyComponent={
           <ThemedText themeColor="textSecondary" style={styles.empty}>
-            Nothing cataloged yet.
+            {(allItems?.length ?? 0) > 0
+              ? 'No items match these filters.'
+              : 'Nothing cataloged yet.'}
           </ThemedText>
         }
         renderItem={({ item }) => {
-          const template = templateFor(collection.vertical);
           const subtitle = subtitleFor(
             template,
             parseCustomFields(item.custom_fields) as FieldValues
