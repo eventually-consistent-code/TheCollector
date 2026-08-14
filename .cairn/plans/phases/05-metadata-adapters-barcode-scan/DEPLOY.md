@@ -1,8 +1,9 @@
 # Phase 5 — cloud deploy checklist
 
-**Status 2026-08-14:** CLI linked, metadata function DEPLOYED, upc_cache
-applied, CARDSIGHT_API_KEY set. UPC bridge + cardsight live-verified.
-Remaining: the 5 keys below + native rebuilds.
+**Status 2026-08-14 (later):** ALL 8 secrets set, every source live-verified
+through the deployed function (Discogs, IGDB, TMDB, Comic Vine, Rebrickable,
+CardSight, UPC bridge + cache). #5 and #11 closed.
+Remaining for #6/T7: native dev-client rebuilds (step 5) + on-device scans.
 
 Code is committed and tested; these steps need John's hands (interactive
 login + API accounts). Once done, T7 e2e verify can run.

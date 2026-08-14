@@ -87,3 +87,12 @@
 {"ts":"2026-08-14T08:30:37.528Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"head -12 /Users/jsreed/repos/TheCollector/.cairn/plans/phases/04-photos/LEDGER.m","error":false}
 {"ts":"2026-08-14T08:30:43.878Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/LEDGER.md","error":false}
 {"ts":"2026-08-14T08:30:48.915Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"gh issue comment 11 --body \"Shipped and live. metadata function deployed, CARDSI","error":false}
+{"ts":"2026-08-14T08:30:55.806Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"sed -i '' 's/^# Phase 5 — cloud deploy checklist (blocked on credentials)/# Phas","error":false}
+{"ts":"2026-08-14T09:12:21.266Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"grep -o '^[A-Z_]*=' supabase/functions/.env | sort && npx supabase secrets set -","error":false}
+{"ts":"2026-08-14T09:12:25.728Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"grep -o '^[A-Z_]*=' .env | sort; echo \"---\"; ls -la supabase/functions/.env .env","error":false}
+{"ts":"2026-08-14T09:12:35.872Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"grep -E '^(DISCOGS_KEY|DISCOGS_SECRET|TWITCH_CLIENT_ID|TWITCH_CLIENT_SECRET|TMDB","error":false}
+{"ts":"2026-08-14T09:12:41.155Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx supabase secrets set --env-file supabase/functions/.env 2>&1 | tail -1","error":false}
+{"ts":"2026-08-14T09:17:40.538Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx supabase secrets set --env-file supabase/functions/.env 2>&1 | tail -1","error":false}
+{"ts":"2026-08-14T09:18:00.817Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"gh issue comment 5 --body \"Complete and live. All sources verified through the d","error":false}
+{"ts":"2026-08-14T09:18:07.165Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/LEDGER.md","error":false}
+{"ts":"2026-08-14T09:18:10.145Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/DEPLOY.md","error":false}
