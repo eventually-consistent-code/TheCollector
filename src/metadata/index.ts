@@ -34,6 +34,8 @@ const ADAPTERS: Record<string, MetadataAdapter> = {
   lego: legoAdapter,
   funko: funkoAdapter,
   // 'other' intentionally absent — manual entry only.
+  // 'art' / 'timepieces' / 'cigars' / 'books' also absent BY DESIGN
+  // (phase 5.5) — no lookup source earns its keep for these yet.
 };
 
 export function getAdapter(templateId: string): MetadataAdapter | undefined {

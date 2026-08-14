@@ -5,12 +5,16 @@
  */
 
 import {
+  art,
+  books,
   bourbon,
+  cigars,
   comics,
   funko,
   lego,
   movies,
   other,
+  timepieces,
   tradingCards,
   videoGames,
   vinyl,
@@ -30,6 +34,10 @@ export const TEMPLATES: readonly Template[] = [
   bourbon,
   lego,
   funko,
+  art,
+  timepieces,
+  cigars,
+  books,
   other,
 ];
 

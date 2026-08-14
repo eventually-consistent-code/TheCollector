@@ -1,7 +1,8 @@
 /**
- * Purpose: The eight vertical templates + generic fallback. Field sets and
+ * Purpose: The twelve vertical templates + generic fallback. Field sets and
  * grading scales come from phase 3 RESEARCH.md — selects only for standards
- * that have not changed in decades; open sets stay text.
+ * that have not changed in decades; open sets stay text. Phase 5.5 adds
+ * art / timepieces / cigars / books (all manual entry — no lookup source).
  * Author(s): John Reed
  */
 
@@ -144,6 +145,76 @@ export const funko: Template = {
     { key: 'vaulted', label: 'Vaulted', type: 'boolean' },
     { key: 'has_protector', label: 'Has Protector', type: 'boolean' },
     { key: 'variant', label: 'Glow / Flocked / Metallic', type: 'text' },
+  ],
+};
+
+// Art is manual-entry only BY DESIGN — no market lookup exists that won't
+// embarrass itself on fine art. Item name carries the work's title.
+export const art: Template = {
+  id: 'art',
+  label: 'Art',
+  subtitleKeys: ['artist', 'year'],
+  fields: [
+    { key: 'artist', label: 'Artist', type: 'text' },
+    { key: 'year', label: 'Year', type: 'number' },
+    { key: 'medium', label: 'Medium', type: 'text', placeholder: 'Oil on canvas' },
+    { key: 'dimensions', label: 'Dimensions', type: 'text', placeholder: '24 × 36 in' },
+    { key: 'provenance', label: 'Provenance Notes', type: 'text' },
+    { key: 'exhibition_history', label: 'Exhibition History', type: 'text' },
+    { key: 'insured_value', label: 'Purchase / Insured Value', type: 'money' },
+  ],
+};
+
+export const timepieces: Template = {
+  id: 'timepieces',
+  label: 'Timepieces',
+  subtitleKeys: ['brand', 'reference_number'],
+  fields: [
+    { key: 'brand', label: 'Brand', type: 'text' },
+    { key: 'model', label: 'Model', type: 'text' },
+    { key: 'reference_number', label: 'Reference Number', type: 'text', placeholder: '116610LN' },
+    { key: 'movement', label: 'Movement', type: 'select', options: ['Automatic', 'Manual Wind', 'Quartz', 'Solar', 'Spring Drive', 'Other'] },
+    { key: 'case_material', label: 'Case Material', type: 'text', placeholder: 'Stainless steel, 18k gold' },
+    { key: 'case_diameter_mm', label: 'Case Diameter (mm)', type: 'number' },
+    { key: 'production_years', label: 'Production Years', type: 'text', placeholder: '1962–1974' },
+    { key: 'has_box', label: 'Has Box', type: 'boolean' },
+    { key: 'has_papers', label: 'Has Papers', type: 'boolean' },
+  ],
+};
+
+export const cigars: Template = {
+  id: 'cigars',
+  label: 'Cigars',
+  subtitleKeys: ['brand', 'vitola'],
+  fields: [
+    { key: 'brand', label: 'Brand', type: 'text' },
+    { key: 'line', label: 'Line', type: 'text', placeholder: 'Serie V, Hemingway' },
+    { key: 'vitola', label: 'Vitola', type: 'select', options: ['Petit Corona', 'Corona', 'Corona Gorda', 'Lonsdale', 'Robusto', 'Toro', 'Gordo', 'Churchill', 'Double Corona', 'Lancero', 'Panetela', 'Perfecto', 'Torpedo', 'Belicoso', 'Other'] },
+    { key: 'wrapper', label: 'Wrapper', type: 'select', options: ['Connecticut Shade', 'Connecticut Broadleaf', 'Habano', 'Corojo', 'Criollo', 'Maduro', 'Oscuro', 'Candela', 'Cameroon', 'Sumatra', 'San Andrés', 'Other'] },
+    { key: 'binder', label: 'Binder', type: 'text' },
+    { key: 'filler', label: 'Filler', type: 'text' },
+    { key: 'ring_gauge', label: 'Ring Gauge', type: 'number' },
+    { key: 'length_inches', label: 'Length (in)', type: 'number' },
+    { key: 'country', label: 'Country', type: 'text', placeholder: 'Nicaragua' },
+    { key: 'release_year', label: 'Release Year', type: 'number' },
+    { key: 'box_count', label: 'Box Count', type: 'number' },
+  ],
+};
+
+// Edition/printing stays free text ON PURPOSE — the collector asserts it;
+// no auto-detection scheme survives contact with real title pages.
+export const books: Template = {
+  id: 'books',
+  label: 'Books',
+  subtitleKeys: ['author'],
+  fields: [
+    { key: 'author', label: 'Author', type: 'text' },
+    { key: 'publisher', label: 'Publisher', type: 'text' },
+    { key: 'publish_date', label: 'Publish Date', type: 'date' },
+    { key: 'isbn', label: 'ISBN', type: 'text', placeholder: '978-0-…' },
+    { key: 'edition_printing', label: 'Edition / Printing', type: 'text', placeholder: '1st edition, 3rd printing' },
+    { key: 'binding', label: 'Binding', type: 'select', options: ['Hardcover', 'Paperback', 'Trade Paperback', 'Mass Market', 'Leather Bound', 'Library Binding', 'Spiral', 'Other'] },
+    { key: 'signed', label: 'Signed', type: 'boolean' },
   ],
 };
 
