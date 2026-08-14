@@ -8,6 +8,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
+import { books } from './books.ts';
 import { cachedSearch } from './lookup_cache.ts';
 
 // Constants
@@ -243,6 +244,10 @@ Deno.serve(async (request) => {
         return await comicvine(params);
       case 'rebrickable':
         return await rebrickable(op, params);
+      case 'books':
+        return await books(op, params, cachedSource, {
+          googleKey: Deno.env.get('GOOGLE_BOOKS_KEY') ?? undefined,
+        });
       case 'upc':
         return await upcBridge(params);
       default:
