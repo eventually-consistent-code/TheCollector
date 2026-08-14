@@ -18,7 +18,7 @@ import {
 import { ThemedText } from '@/components/themed-text';
 // Estate & Ember accents — brass outlines, hunter-green active fill, amber
 // for the clear-all affordance — all from the shared token palette.
-import { Palette } from '@/constants/theme';
+import { FontFamily, Palette, Spacing, Type } from '@/constants/theme';
 import type { ItemSort } from '@/db/query';
 import { useTheme } from '@/hooks/use-theme';
 import type { Template } from '@/templates';
@@ -38,7 +38,7 @@ function Chip({
       onPress={onPress}
       style={[styles.chip, active && styles.chipActive]}
     >
-      <ThemedText type="small">{label}</ThemedText>
+      <ThemedText style={Type.data}>{label}</ThemedText>
     </Pressable>
   );
 }
@@ -46,7 +46,7 @@ function Chip({
 // Letterspaced caps label above each group — matches the app's label voice.
 function GroupLabel({ children }: { children: string }) {
   return (
-    <ThemedText type="smallBold" themeColor="textSecondary" style={styles.caps}>
+    <ThemedText themeColor="textSecondary" style={Type.label}>
       {children.toUpperCase()}
     </ThemedText>
   );
@@ -119,13 +119,13 @@ export function ItemFilterBar({
 
       <View style={styles.filterHead}>
         <Pressable hitSlop={8} onPress={() => setOpen(!open)}>
-          <ThemedText type="smallBold" themeColor="textSecondary" style={styles.caps}>
+          <ThemedText themeColor="textSecondary" style={Type.label}>
             {`FILTERS ${open ? '▾' : '▸'}${activeCount > 0 ? `  ·  ${activeCount}` : ''}`}
           </ThemedText>
         </Pressable>
         {activeCount > 0 && (
           <Pressable hitSlop={8} onPress={() => onState(EMPTY_FILTER_STATE)}>
-            <ThemedText type="small" style={styles.clear}>
+            <ThemedText themeColor="highlight" style={styles.clear}>
               Clear all
             </ThemedText>
           </Pressable>
@@ -156,7 +156,7 @@ export function ItemFilterBar({
               <TextInput
                 style={[
                   styles.rangeInput,
-                  { backgroundColor: theme.backgroundElement, color: theme.text },
+                  { backgroundColor: theme.surfaceRaised, color: theme.text },
                 ]}
                 placeholder="min"
                 placeholderTextColor={theme.textSecondary}
@@ -167,7 +167,7 @@ export function ItemFilterBar({
               <TextInput
                 style={[
                   styles.rangeInput,
-                  { backgroundColor: theme.backgroundElement, color: theme.text },
+                  { backgroundColor: theme.surfaceRaised, color: theme.text },
                 ]}
                 placeholder="max"
                 placeholderTextColor={theme.textSecondary}
@@ -197,7 +197,7 @@ export function ItemFilterBar({
       )}
 
       {activeCount > 0 && (
-        <ThemedText type="small" themeColor="textSecondary" style={styles.count}>
+        <ThemedText themeColor="textSecondary" style={[Type.data, styles.count]}>
           {shown} of {total}
         </ThemedText>
       )}
@@ -206,17 +206,17 @@ export function ItemFilterBar({
 }
 
 const styles = StyleSheet.create({
-  bar: { gap: 8, marginBottom: 4 },
-  caps: { letterSpacing: 1.5, textTransform: 'uppercase' },
+  bar: { gap: Spacing.two, marginBottom: Spacing.one },
   // pillRow scrolls horizontally (no wrap allowed there); chipRow wraps.
-  pillRow: { flexDirection: 'row', gap: 8 },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  pillRow: { flexDirection: 'row', gap: Spacing.two },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  // Pills: transparent + brass outline idle; hunter fill takes over active.
   chip: {
     borderWidth: 1,
     borderColor: Palette.brass,
     borderRadius: 16,
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 6,
   },
   chipActive: {
     backgroundColor: Palette.hunter,
@@ -226,16 +226,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: Spacing.two,
   },
-  clear: { color: Palette.amber, fontWeight: 'bold' },
+  clear: { ...Type.data, fontFamily: FontFamily.sansSemiBold },
   group: { gap: 6 },
-  rangeRow: { flexDirection: 'row', gap: 8 },
+  rangeRow: { flexDirection: 'row', gap: Spacing.two },
+  // Control radius is 4px in the system (cards get 8).
   rangeInput: {
     flex: 1,
-    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Palette.brass,
+    borderRadius: 4,
     padding: 10,
+    fontFamily: FontFamily.sans,
     fontSize: 16,
   },
-  count: { marginTop: 4 },
+  count: { marginTop: Spacing.one },
 });

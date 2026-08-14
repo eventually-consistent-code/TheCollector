@@ -18,6 +18,7 @@ import {
 } from '@/components/item-filter-state';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { FontFamily, Spacing, Type } from '@/constants/theme';
 import { deleteCollection, parseCustomFields, renameCollection } from '@/db/crud';
 import { useCollection, useCollectionTags, useFilteredItems, useItems } from '@/db/hooks';
 import { DEFAULT_SORT, type ItemSort } from '@/db/query';
@@ -89,7 +90,7 @@ export default function CollectionScreen() {
                   setEditing(true);
                 }}
               >
-                <ThemedText type="small" themeColor="textSecondary">
+                <ThemedText themeColor="textSecondary" style={Type.label}>
                   {collection.vertical} · tap to rename
                 </ThemedText>
               </Pressable>
@@ -121,23 +122,32 @@ export default function CollectionScreen() {
             template,
             parseCustomFields(item.custom_fields) as FieldValues
           );
-          const line = [subtitle, item.current_value_cents != null ? centsToDisplay(item.current_value_cents) : null]
-            .filter(Boolean)
-            .join(' · ');
+          const value =
+            item.current_value_cents != null ? centsToDisplay(item.current_value_cents) : null;
           return (
             <Link href={`/item/${item.id}`} asChild>
+              {/* Collector's-tray card — serif name, muted subtitle, amber value. */}
               <Pressable
                 style={StyleSheet.flatten([
                   styles.card,
-                  { backgroundColor: theme.backgroundElement },
+                  { backgroundColor: theme.surfaceRaised, borderColor: theme.hairline },
                 ])}
               >
-                <ThemedText type="subtitle">{item.name}</ThemedText>
-                {line !== '' && (
-                  <ThemedText type="small" themeColor="textSecondary">
-                    {line}
-                  </ThemedText>
-                )}
+                <View style={styles.cardRow}>
+                  <View style={styles.cardMain}>
+                    <ThemedText style={styles.cardName}>{item.name}</ThemedText>
+                    {!!subtitle && (
+                      <ThemedText themeColor="textSecondary" style={Type.data}>
+                        {subtitle}
+                      </ThemedText>
+                    )}
+                  </View>
+                  {value != null && (
+                    <ThemedText themeColor="highlight" style={styles.cardValue}>
+                      {value}
+                    </ThemedText>
+                  )}
+                </View>
               </Pressable>
             </Link>
           );
@@ -148,10 +158,10 @@ export default function CollectionScreen() {
           <Pressable
             style={StyleSheet.flatten([
               styles.addButton,
-              { backgroundColor: theme.backgroundSelected },
+              { backgroundColor: theme.accent },
             ])}
           >
-            <ThemedText type="subtitle">+ Add Item</ThemedText>
+            <ThemedText style={styles.buttonText}>+ Add Item</ThemedText>
           </Pressable>
         </Link>
         {/* Scan only shows where the vertical has a metadata adapter. */}
@@ -160,10 +170,11 @@ export default function CollectionScreen() {
             <Pressable
               style={StyleSheet.flatten([
                 styles.addButton,
-                { backgroundColor: theme.backgroundElement },
+                styles.addButtonQuiet,
+                { backgroundColor: theme.surfaceRaised, borderColor: theme.hairline },
               ])}
             >
-              <ThemedText type="subtitle">Scan to Add</ThemedText>
+              <ThemedText style={styles.buttonText}>Scan to Add</ThemedText>
             </Pressable>
           </Link>
         )}
@@ -179,20 +190,33 @@ export default function CollectionScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  list: { padding: 16 },
-  header: { marginBottom: 12 },
-  empty: { textAlign: 'center', marginTop: 32 },
+  list: { padding: Spacing.three },
+  header: { marginBottom: Spacing.three },
+  empty: { textAlign: 'center', marginTop: Spacing.five },
+  // 8px card radius + 1px brass hairline per the Estate & Ember system.
   card: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    gap: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: Spacing.four,
+    marginBottom: Spacing.three,
   },
-  footer: { padding: 16, gap: 0 },
+  cardRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: Spacing.two,
+  },
+  cardMain: { flex: 1, gap: Spacing.one },
+  cardName: { ...Type.title },
+  // Value rides the amber highlight, right-aligned in Geist.
+  cardValue: { ...Type.data, fontFamily: FontFamily.sansSemiBold, textAlign: 'right' },
+  footer: { padding: Spacing.three, gap: 0 },
   addButton: {
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 8,
+    padding: Spacing.three,
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.three,
   },
+  addButtonQuiet: { borderWidth: 1 },
+  buttonText: { ...Type.body, fontFamily: FontFamily.sansSemiBold },
 });

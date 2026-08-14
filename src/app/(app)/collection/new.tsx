@@ -12,6 +12,7 @@ import { ScrollView } from 'react-native';
 import { useSession } from '@/auth/session';
 import { ActionButton, ChipPicker, Field } from '@/components/form';
 import { ThemedView } from '@/components/themed-view';
+import { Spacing } from '@/constants/theme';
 import { createCollection } from '@/db/crud';
 import { VERTICAL_IDS } from '@/templates';
 
@@ -35,7 +36,7 @@ export default function NewCollectionScreen() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView contentContainerStyle={{ padding: Spacing.three }}>
         <Field
           label="Name"
           value={name}
