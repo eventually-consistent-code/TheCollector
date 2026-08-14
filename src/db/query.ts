@@ -75,9 +75,12 @@ export function buildSearchQuery(
     `OR (items.custom_fields IS NOT NULL AND items.custom_fields != '' ` +
     `AND EXISTS (SELECT 1 FROM json_each(items.custom_fields) ` +
     `WHERE json_each.value LIKE ? ESCAPE '\\')) ` +
+    `OR (json_valid(items.tags) ` +
+    `AND EXISTS (SELECT 1 FROM json_each(items.tags) ` +
+    `WHERE json_each.value LIKE ? ESCAPE '\\')) ` +
     `ORDER BY items.name COLLATE NOCASE ASC`;
 
-  return { sql, params: [like, like, like] };
+  return { sql, params: [like, like, like, like] };
 }
 
 //*************************************************************************

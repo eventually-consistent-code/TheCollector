@@ -67,10 +67,21 @@ describe('buildSearchQuery', () => {
     expect(built.sql).toContain('items.notes IS NOT NULL');
   });
 
-  test('binds one escaped LIKE param per branch (name, notes, values)', () => {
+  test('binds one escaped LIKE param per branch (name, notes, values, tags)', () => {
     const built = buildSearchQuery('  50%_off  ')!;
-    expect(built.params).toEqual(['%50\\%\\_off%', '%50\\%\\_off%', '%50\\%\\_off%']);
+    expect(built.params).toEqual([
+      '%50\\%\\_off%',
+      '%50\\%\\_off%',
+      '%50\\%\\_off%',
+      '%50\\%\\_off%',
+    ]);
     expect(built.sql).toMatch(/LIKE \? ESCAPE '\\'/);
+  });
+
+  test('searches tags behind a json_valid guard', () => {
+    const built = buildSearchQuery('grail')!;
+    expect(built.sql).toContain('json_valid(items.tags)');
+    expect(built.sql).toContain('json_each(items.tags)');
   });
 });
 
@@ -266,6 +277,16 @@ describe('generated SQL runs on a real PowerSync db', () => {
   test('LIKE wildcards in input are literal', async () => {
     // "%" must not act as a wildcard: only the literal "100%" item hits.
     expect((await search('100%')).map((r) => r.id)).toEqual(['i2']);
+  });
+
+  test('search finds items by tag; empty-string tags never crash', async () => {
+    await db.execute(`UPDATE items SET tags = '["grail","first pressing"]' WHERE id = 'i1'`);
+    await db.execute(`UPDATE items SET tags = '' WHERE id = 'i2'`);
+
+    expect((await search('grail')).map((r) => r.id)).toEqual(['i1']);
+    expect((await search('first press')).map((r) => r.id)).toEqual(['i1']);
+    // i2's empty-string tags must be skipped by the json_valid guard, not throw.
+    expect(await search('zzz-no-match')).toEqual([]);
   });
 
   test('filter fragments execute: select, boolean, range, composed', async () => {
