@@ -6,6 +6,7 @@
 
 import {
   bourbon,
+  cigars,
   comics,
   funko,
   lego,
@@ -30,6 +31,7 @@ export const TEMPLATES: readonly Template[] = [
   bourbon,
   lego,
   funko,
+  cigars,
   other,
 ];
 

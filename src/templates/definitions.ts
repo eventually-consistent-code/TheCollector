@@ -147,6 +147,25 @@ export const funko: Template = {
   ],
 };
 
+export const cigars: Template = {
+  id: 'cigars',
+  label: 'Cigars',
+  subtitleKeys: ['line', 'vitola'],
+  fields: [
+    { key: 'brand', label: 'Brand', type: 'text' },
+    { key: 'line', label: 'Line', type: 'text', placeholder: '1964 Anniversary' },
+    { key: 'vitola', label: 'Vitola', type: 'text', placeholder: 'Robusto, Torpedo' },
+    { key: 'wrapper', label: 'Wrapper', type: 'text', placeholder: 'Connecticut Broadleaf' },
+    { key: 'binder', label: 'Binder', type: 'text' },
+    { key: 'filler', label: 'Filler', type: 'text' },
+    { key: 'ring_gauge', label: 'Ring Gauge', type: 'number' },
+    { key: 'length_inches', label: 'Length (inches)', type: 'number' },
+    { key: 'country', label: 'Country', type: 'text' },
+    { key: 'release_year', label: 'Release Year', type: 'number' },
+    { key: 'box_count', label: 'Box Count', type: 'number' },
+  ],
+};
+
 export const other: Template = {
   id: 'other',
   label: 'Other',

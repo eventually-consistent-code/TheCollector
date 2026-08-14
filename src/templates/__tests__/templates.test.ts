@@ -7,8 +7,8 @@
 import { TEMPLATES, formatFieldValue, subtitleFor, templateFor } from '../index';
 
 describe('registry invariants', () => {
-  test('nine templates, unique ids', () => {
-    expect(TEMPLATES).toHaveLength(9);
+  test('ten templates, unique ids', () => {
+    expect(TEMPLATES).toHaveLength(10);
     const ids = TEMPLATES.map((t) => t.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
