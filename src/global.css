@@ -1,9 +1,19 @@
 :root {
-  --font-display:
-    Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-    Segoe UI Symbol, Noto Color Emoji;
+  /* Estate & Ember families. On web, expo-font's useFonts injects @font-face
+     rules named after the loaded keys (LibreCaslonText_400Regular, ...), so
+     these stacks resolve to the real fonts once loaded and fall back to
+     system faces before that. */
+  --font-serif: LibreCaslonText_400Regular, 'Libre Caslon Text', Georgia, 'Times New Roman', serif;
+  --font-serif-bold: LibreCaslonText_700Bold, 'Libre Caslon Text', Georgia, 'Times New Roman', serif;
+  --font-sans:
+    Geist_400Regular, Geist, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji,
+    Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  --font-sans-medium: Geist_500Medium, Geist, Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-sans-semibold: Geist_600SemiBold, Geist, Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-sans-bold: Geist_700Bold, Geist, Inter, ui-sans-serif, system-ui, sans-serif;
+  /* Legacy alias — --font-sans is the canonical display stack now. */
+  --font-display: var(--font-sans);
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
   --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
 }

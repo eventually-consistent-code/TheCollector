@@ -16,17 +16,12 @@ import {
   type ItemFilterState,
 } from '@/components/item-filter-state';
 import { ThemedText } from '@/components/themed-text';
+// Estate & Ember accents — brass outlines, hunter-green active fill, amber
+// for the clear-all affordance — all from the shared token palette.
+import { Palette } from '@/constants/theme';
 import type { ItemSort } from '@/db/query';
 import { useTheme } from '@/hooks/use-theme';
 import type { Template } from '@/templates';
-
-// Constants
-
-// Estate & Ember accents — brass outlines, hunter-green active fill, amber
-// for the clear-all affordance.
-const BRASS = '#504532';
-const HUNTER = '#355E3B';
-const AMBER = '#FFBF00';
 
 // One tappable chip — brass outline idle, hunter-green fill when active.
 function Chip({
@@ -218,14 +213,14 @@ const styles = StyleSheet.create({
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
     borderWidth: 1,
-    borderColor: BRASS,
+    borderColor: Palette.brass,
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 4,
   },
   chipActive: {
-    backgroundColor: HUNTER,
-    borderColor: HUNTER,
+    backgroundColor: Palette.hunter,
+    borderColor: Palette.hunter,
   },
   filterHead: {
     flexDirection: 'row',
@@ -233,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
-  clear: { color: AMBER, fontWeight: 'bold' },
+  clear: { color: Palette.amber, fontWeight: 'bold' },
   group: { gap: 6 },
   rangeRow: { flexDirection: 'row', gap: 8 },
   rangeInput: {

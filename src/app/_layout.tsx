@@ -1,35 +1,61 @@
 /**
  * Purpose: Root layout — session-gated routing. Signed out → (auth) group;
- * signed in → (app) group wrapped in the PowerSync provider.
+ * signed in → (app) group wrapped in the PowerSync provider. Also owns the
+ * Estate & Ember nav theme and the custom font load, both folded into the
+ * splash-hold gate.
  * Author(s): John Reed
  */
 
+import { Geist_400Regular, Geist_500Medium, Geist_600SemiBold, Geist_700Bold } from '@expo-google-fonts/geist';
+import {
+  LibreCaslonText_400Regular,
+  LibreCaslonText_700Bold,
+} from '@expo-google-fonts/libre-caslon-text';
 import { PowerSyncContext } from '@powersync/react';
-import { DarkTheme, DefaultTheme, ThemeProvider, Stack } from 'expo-router';
+import { useFonts } from 'expo-font';
+import { DarkTheme, ThemeProvider, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 
 import { SessionProvider, useSession } from '@/auth/session';
+import { Colors } from '@/constants/theme';
 import { db } from '@/db/database';
 import { useSyncLifecycle } from '@/db/sync';
 
 SplashScreen.preventAutoHideAsync();
 
-function RootNavigator() {
+// Estate & Ember nav chrome — charcoal card/background, vellum text, brass
+// hairline borders, amber accents. Dark-only, so this is the only theme.
+const EstateEmberTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: Colors.dark.highlight,
+    background: Colors.dark.background,
+    card: Colors.dark.background,
+    text: Colors.dark.text,
+    border: Colors.dark.hairline,
+    notification: Colors.dark.highlight,
+  },
+};
+
+function RootNavigator({ fontsReady }: { fontsReady: boolean }) {
   const { session, ready } = useSession();
 
   // Adopt-then-connect whenever a session lands.
   useSyncLifecycle(db, session);
 
-  // Hold the splash until both the db and the initial session are known.
+  // Hold the splash until the db, the initial session, and the fonts are
+  // all known — no unstyled-text flash on first paint.
+  const allReady = ready && fontsReady;
+
   useEffect(() => {
-    if (ready) {
+    if (allReady) {
       SplashScreen.hideAsync();
     }
-  }, [ready]);
+  }, [allReady]);
 
-  if (!ready) {
+  if (!allReady) {
     return null;
   }
 
@@ -46,7 +72,15 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  // Estate & Ember faces — serif display + sans body/data weights.
+  const [fontsLoaded, fontError] = useFonts({
+    LibreCaslonText_400Regular,
+    LibreCaslonText_700Bold,
+    Geist_400Regular,
+    Geist_500Medium,
+    Geist_600SemiBold,
+    Geist_700Bold,
+  });
 
   useEffect(() => {
     db.init();
@@ -59,8 +93,9 @@ export default function RootLayout() {
   return (
     <PowerSyncContext.Provider value={db}>
       <SessionProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <RootNavigator />
+        <ThemeProvider value={EstateEmberTheme}>
+          {/* A font error should degrade to system faces, not hold the splash forever. */}
+          <RootNavigator fontsReady={fontsLoaded || !!fontError} />
         </ThemeProvider>
       </SessionProvider>
     </PowerSyncContext.Provider>
