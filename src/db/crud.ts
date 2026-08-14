@@ -69,7 +69,14 @@ export interface ItemFieldsInput {
   purchasePriceCents?: number;
   currentValueCents?: number;
   customFields?: Record<string, unknown>;
+  tags?: string[];
 }
+
+// Serializes tags for storage — normalized, empty set stores null.
+const tagsToJson = (tags?: string[]): string | null => {
+  const normalized = normalizeTags(tags ?? []);
+  return normalized.length ? JSON.stringify(normalized) : null;
+};
 
 // Creates an item in a collection, returns its id.
 export async function createItem(
@@ -83,9 +90,9 @@ export async function createItem(
   await db.execute(
     `INSERT INTO items
        (id, user_id, collection_id, name, notes, acquired_at,
-        purchase_price_cents, current_value_cents, custom_fields,
+        purchase_price_cents, current_value_cents, custom_fields, tags,
         created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       id,
       userId,
@@ -96,6 +103,7 @@ export async function createItem(
       input.purchasePriceCents ?? null,
       input.currentValueCents ?? null,
       input.customFields ? JSON.stringify(input.customFields) : null,
+      tagsToJson(input.tags),
       ts,
       ts,
     ]
@@ -112,7 +120,7 @@ export async function updateItem(
     `UPDATE items SET
        name = ?, notes = ?, acquired_at = ?,
        purchase_price_cents = ?, current_value_cents = ?, custom_fields = ?,
-       updated_at = ?
+       tags = ?, updated_at = ?
      WHERE id = ?`,
     [
       input.name,
@@ -121,6 +129,7 @@ export async function updateItem(
       input.purchasePriceCents ?? null,
       input.currentValueCents ?? null,
       input.customFields ? JSON.stringify(input.customFields) : null,
+      tagsToJson(input.tags),
       now(),
       id,
     ]
@@ -132,6 +141,35 @@ export async function deleteItem(
   id: string
 ): Promise<void> {
   await db.execute(`DELETE FROM items WHERE id = ?`, [id]);
+}
+
+// Normalizes user-entered tags — trim, lowercase, drop empties, dedupe.
+// One helper so the form and the data layer agree on what a tag is.
+export function normalizeTags(tags: string[]): string[] {
+  const seen = new Set<string>();
+  for (const tag of tags) {
+    const clean = tag.trim().toLowerCase();
+    if (clean) {
+      seen.add(clean);
+    }
+  }
+  return [...seen];
+}
+
+// Parses an item row's tags JSON, guarding bad shapes — mirrors
+// parseCustomFields: absent/null/malformed all come back as [].
+export function parseTags(raw: string | null): string[] {
+  if (!raw) {
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed.filter((t): t is string => typeof t === 'string')
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 // Parses an item row's custom_fields JSON, guarding bad shapes.

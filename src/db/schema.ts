@@ -37,6 +37,8 @@ const items = new Table(
     purchase_price_cents: column.integer,
     current_value_cents: column.integer,
     custom_fields: column.text,
+    // JSON array of lowercase tag strings (phase 6) — normalized in crud.ts.
+    tags: column.text,
     created_at: column.text,
     updated_at: column.text,
   },
