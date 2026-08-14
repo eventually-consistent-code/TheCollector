@@ -22,5 +22,25 @@
 - **Insights screen is new scope** (mock exists, no app screen yet) — decide
   at plan time whether it lands here or with phase 7 value tracking, since
   its charts need phase 7 data.
-- **Fonts:** Libre Caslon Text + Geist via expo-font/@expo-google-fonts;
-  verify Geist availability there at plan time (fallback: Inter or system).
+- **Fonts:** `@expo-google-fonts/libre-caslon-text` (v0.4.0) +
+  `@expo-google-fonts/geist` (v0.4.2) — both verified on npm (Geist joined
+  Google Fonts; no manual .ttf bundling). Loaded via `useFonts` in the root
+  layout behind the existing splash-hold gate (no dev-client rebuild
+  needed); web gets the families through global.css vars.
+- **Scope cut (planning decision): the 5-tab App Shell is NOT in 6.5.**
+  Dashboard, Insights, and Profile screens don't exist, and global Scan is
+  a product question (scan is collection-scoped today) — that's new IA, not
+  a restyle. 6.5 skins the current Stack completely; tabs + Dashboard +
+  Insights become their own phase (candidate: fold into/alongside phase 7,
+  whose value-tracking data the Insights charts need anyway).
+- **Theme mechanism:** extend the EXISTING system — src/constants/theme.ts
+  tokens + useTheme() + ThemedText/ThemedView. Dark ("drawing room") becomes
+  the only real scheme; semantic keys grow (surface, surfaceRaised,
+  hairline/brass, accent/hunter, highlight/amber, ink/vellum) + a Type
+  scale. No theme context/provider — over-engineering at this size.
+- **Web:** fix the pre-hydration light-flash (use-color-scheme.web.ts
+  defaults light) as part of going dark-only; update global.css font vars
+  and load real webfonts.
+- **Brand assets:** no heraldic mark exists in-repo — export from the
+  Stitch logo screens; regenerate icon/splash/favicon on charcoal #121212
+  (splash is currently template blue #208AEF in app.json).
