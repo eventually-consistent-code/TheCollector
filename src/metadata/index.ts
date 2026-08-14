@@ -6,6 +6,7 @@
  * Author(s): John Reed
  */
 
+import { artAdapter } from './adapters/art';
 import { bourbonAdapter } from './adapters/bourbon';
 import { comicsAdapter } from './adapters/comics';
 import { funkoAdapter } from './adapters/funko';
@@ -33,8 +34,9 @@ const ADAPTERS: Record<string, MetadataAdapter> = {
   bourbon: bourbonAdapter,
   lego: legoAdapter,
   funko: funkoAdapter,
+  art: artAdapter,
   // 'other' intentionally absent — manual entry only.
-  // 'art' / 'timepieces' / 'cigars' / 'books' also absent BY DESIGN
+  // 'timepieces' / 'cigars' / 'books' also absent BY DESIGN
   // (phase 5.5) — no lookup source earns its keep for these yet.
 };
 
