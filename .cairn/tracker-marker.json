@@ -77,6 +77,62 @@
       ],
       "state": "closed",
       "updatedAt": "2026-08-13T05:58:21Z"
+    },
+    "12": {
+      "title": "P5.5-T1: Data models + template registry entries for art, timepieces, cigars, books",
+      "bodyHash": "0bc776ea25ea19c0",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-14T12:56:18Z"
+    },
+    "13": {
+      "title": "P5.5-T2: Extend upc_cache to a general lookup cache for text-query adapter hits",
+      "bodyHash": "95aabae9fc802249",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-14T12:58:44Z"
+    },
+    "14": {
+      "title": "P5.5-T3: Books metadata adapter — Open Library primary, Google Books fallback, ISBN scan routing",
+      "bodyHash": "609cf6a0f1638325",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-14T13:59:59Z"
+    },
+    "15": {
+      "title": "P5.5-T4: Art metadata adapter — AIC primary, Met fallback, Wikidata artist prefill",
+      "bodyHash": "3c31a46a4f25c7c6",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-14T14:00:00Z"
+    },
+    "16": {
+      "title": "P5.5-T5: Timepieces metadata adapter — thewatchapi reference search + UPCitemdb bridge",
+      "bodyHash": "9baacaddb226b27f",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-14T14:00:01Z"
+    },
+    "17": {
+      "title": "P5.5-T6: Cigars vertical — curated seed dataset + UPC fuzzy match + manual template",
+      "bodyHash": "fc0cf3e7aea07b91",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-14T14:00:02Z"
+    },
+    "18": {
+      "title": "P5.5-T7: Stitch mocks — Timepieces + Cigars vault/detail (Estate & Ember)",
+      "bodyHash": "7b62d027530aa495",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-14T13:31:45Z"
     }
   },
   "phases": {
