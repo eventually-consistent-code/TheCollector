@@ -57,10 +57,10 @@
     },
     "8": {
       "title": "REQ-08: Search, filter, and sort across collections",
-      "bodyHash": "1ec3d8b8c186f223",
+      "bodyHash": "20e7350de9301426",
       "labels": [],
-      "state": "open",
-      "updatedAt": "2026-08-09T05:39:06Z"
+      "state": "closed",
+      "updatedAt": "2026-08-14T15:22:51Z"
     },
     "9": {
       "title": "REQ-09: Value tracking — purchase price, current value, totals, simple stats",
@@ -133,6 +133,47 @@
       "assignee": "eventually-consistent-code",
       "state": "closed",
       "updatedAt": "2026-08-14T13:31:45Z"
+    },
+    "19": {
+      "title": "P6-T1: Tags — items.tags column end-to-end + chip editor on item form",
+      "bodyHash": "e68bbf0fec65bd3f",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-14T14:37:57Z"
+    },
+    "20": {
+      "title": "P6-T2: Query layer — search hook, template-driven filter compiler, sort enum",
+      "bodyHash": "af58e4f51378eea4",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-14T14:39:52Z"
+    },
+    "21": {
+      "title": "P6-T3: Global search screen — cross-collection results",
+      "bodyHash": "54af7b2dc5de5726",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-14T14:44:54Z"
+    },
+    "22": {
+      "title": "P6-T4: Collection filter + sort UI — template-driven chips in the list header",
+      "bodyHash": "de6fb1c6484321a2",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-14T14:49:21Z"
+    },
+    "23": {
+      "title": "Global search does not match tags — buildSearchQuery searches name/notes/custom_fields values only; items.tags never included, so a saved tag is unfindable from the search screen (REQ-08 requires tag search)",
+      "bodyHash": "e3b0c44298fc1c14",
+      "labels": [
+        "cairn:bug"
+      ],
+      "state": "closed",
+      "updatedAt": "2026-08-14T15:22:35Z"
     }
   },
   "phases": {
