@@ -6,14 +6,14 @@
  */
 
 import { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
+import { FieldLabel, StationeryInput } from '@/components/form';
 import { ThemedText } from '@/components/themed-text';
 // Estate & Ember accents — brass outline, amber remove affordance — from the
 // shared token palette.
-import { Palette } from '@/constants/theme';
+import { FontFamily, Palette } from '@/constants/theme';
 import { normalizeTags } from '@/db/crud';
-import { useTheme } from '@/hooks/use-theme';
 
 // Read-only chip row — renders nothing when there are no tags.
 export function TagChips({ tags }: { tags: string[] }) {
@@ -24,7 +24,9 @@ export function TagChips({ tags }: { tags: string[] }) {
     <View style={styles.row}>
       {tags.map((tag) => (
         <View key={tag} style={styles.chip}>
-          <ThemedText type="small">{tag}</ThemedText>
+          <ThemedText type="small" style={styles.chipText}>
+            {tag}
+          </ThemedText>
         </View>
       ))}
     </View>
@@ -39,7 +41,6 @@ export function TagEditor({
   tags: string[];
   onChange: (tags: string[]) => void;
 }) {
-  const theme = useTheme();
   const [draft, setDraft] = useState('');
 
   // Folds the draft (comma-separated is fine) into the normalized set.
@@ -51,14 +52,14 @@ export function TagEditor({
 
   return (
     <View style={styles.field}>
-      <ThemedText type="smallBold" themeColor="textSecondary">
-        Tags
-      </ThemedText>
+      <FieldLabel>Tags</FieldLabel>
       {tags.length > 0 && (
         <View style={styles.row}>
           {tags.map((tag) => (
             <View key={tag} style={styles.chip}>
-              <ThemedText type="small">{tag}</ThemedText>
+              <ThemedText type="small" style={styles.chipText}>
+                {tag}
+              </ThemedText>
               <Pressable
                 hitSlop={8}
                 onPress={() => onChange(tags.filter((t) => t !== tag))}
@@ -71,13 +72,8 @@ export function TagEditor({
           ))}
         </View>
       )}
-      <TextInput
-        style={[
-          styles.input,
-          { backgroundColor: theme.backgroundElement, color: theme.text },
-        ]}
+      <StationeryInput
         placeholder="add a tag, comma or return to add"
-        placeholderTextColor={theme.textSecondary}
         autoCapitalize="none"
         autoCorrect={false}
         value={draft}
@@ -109,10 +105,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
   },
-  remove: { color: Palette.amber, fontWeight: 'bold' },
-  input: {
-    borderRadius: 10,
-    padding: 12,
-    fontSize: 16,
-  },
+  chipText: { fontFamily: FontFamily.sansMedium, letterSpacing: 0.3 },
+  remove: { color: Palette.amber, fontFamily: FontFamily.sansBold },
 });

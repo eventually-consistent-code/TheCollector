@@ -1,6 +1,14 @@
+/**
+ * Purpose: Themed text — every text role mapped onto the Estate & Ember
+ * type scale. Serif (Libre Caslon) for title/subtitle, Geist for body and
+ * data. Weight comes from the loaded per-weight families, not fontWeight —
+ * numeric weights on top of a loaded family break the swap on Android.
+ * Author(s): John Reed
+ */
+
 import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
 
-import { Fonts, Palette, ThemeColor } from '@/constants/theme';
+import { FontFamily, Fonts, Palette, ThemeColor, Type } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export type ThemedTextProps = TextProps & {
@@ -31,40 +39,43 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
 }
 
 const styles = StyleSheet.create({
+  // Geist data voice — small supporting text.
   small: {
+    fontFamily: FontFamily.sansMedium,
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: 500,
   },
   smallBold: {
+    fontFamily: FontFamily.sansBold,
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: 700,
   },
+  // Geist body — the default reading voice.
   default: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: 500,
+    ...Type.body,
   },
+  // Serif display/title — the collector's-study voice.
   title: {
-    fontSize: 48,
-    fontWeight: 600,
-    lineHeight: 52,
+    ...Type.display,
   },
   subtitle: {
-    fontSize: 32,
-    lineHeight: 44,
-    fontWeight: 600,
+    ...Type.title,
   },
+  // Links read amber — the one lamp in the room.
   link: {
-    lineHeight: 30,
-    fontSize: 14,
-  },
-  linkPrimary: {
+    fontFamily: FontFamily.sansMedium,
     lineHeight: 30,
     fontSize: 14,
     color: Palette.amber,
   },
+  linkPrimary: {
+    fontFamily: FontFamily.sansMedium,
+    lineHeight: 30,
+    fontSize: 14,
+    color: Palette.amber,
+  },
+  // Code stays on the system mono stack — not a loaded family, so the
+  // numeric weight is still doing real work here.
   code: {
     fontFamily: Fonts.mono,
     fontWeight: Platform.select({ android: 700 }) ?? 500,

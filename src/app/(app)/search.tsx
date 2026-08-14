@@ -7,14 +7,15 @@
 
 import { Link } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
+import { StationeryInput } from '@/components/form';
 import { TagChips } from '@/components/tag-chips';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 // Estate & Ember accents — brass hairlines, amber values — from the shared
 // token palette (see tag-chips).
-import { Palette } from '@/constants/theme';
+import { FontFamily, Palette, Type } from '@/constants/theme';
 import { parseCustomFields, parseTags } from '@/db/crud';
 import { useSearchItems, type SearchItemRow } from '@/db/hooks';
 import { useTheme } from '@/hooks/use-theme';
@@ -43,7 +44,7 @@ function ResultRow({ item }: { item: SearchItemRow }) {
       <Pressable
         style={StyleSheet.flatten([
           styles.card,
-          { backgroundColor: theme.backgroundElement },
+          { backgroundColor: theme.surfaceRaised },
         ])}
       >
         <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
@@ -71,7 +72,6 @@ function ResultRow({ item }: { item: SearchItemRow }) {
 }
 
 export default function SearchScreen() {
-  const theme = useTheme();
   const [input, setInput] = useState('');
   const [query, setQuery] = useState('');
 
@@ -99,13 +99,9 @@ export default function SearchScreen() {
   return (
     <ThemedView style={styles.container}>
       <View style={styles.searchRow}>
-        <TextInput
-          style={[
-            styles.input,
-            { backgroundColor: theme.backgroundElement, color: theme.text },
-          ]}
+        <StationeryInput
+          style={styles.input}
           placeholder="Search the vault…"
-          placeholderTextColor={theme.textSecondary}
           autoFocus
           autoCapitalize="none"
           autoCorrect={false}
@@ -159,19 +155,15 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     gap: 8,
   },
-  input: {
-    flex: 1,
-    borderRadius: 10,
-    padding: 12,
-    fontSize: 16,
-  },
+  input: { flex: 1 },
   clear: { paddingHorizontal: 4 },
   clearMark: { color: Palette.amber, fontSize: 20 },
   list: { padding: 16 },
   count: { marginBottom: 12 },
   empty: { textAlign: 'center', marginTop: 32 },
+  // Collector's tray — raised surface, brass hairline, 8px radius.
   card: {
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 16,
     marginBottom: 12,
     gap: 4,
@@ -179,10 +171,8 @@ const styles = StyleSheet.create({
     borderColor: Palette.brass,
   },
   label: {
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    ...Type.label,
     fontSize: 11,
-    lineHeight: 16,
   },
   nameRow: {
     flexDirection: 'row',
@@ -191,5 +181,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   name: { flexShrink: 1 },
-  value: { color: Palette.amber, textAlign: 'right' },
+  value: {
+    color: Palette.amber,
+    textAlign: 'right',
+    fontFamily: FontFamily.sansSemiBold,
+  },
 });

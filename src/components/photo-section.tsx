@@ -11,6 +11,8 @@ import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { ActionButton } from '@/components/form';
 import { ItemPhoto } from '@/components/item-photo';
 import { ThemedText } from '@/components/themed-text';
+// Brass hairline frames around the thumbnails — framed plates in the study.
+import { Palette } from '@/constants/theme';
 import { deletePhoto, savePhoto } from '@/db/photos';
 import { pickPhotos, takePhoto } from '@/lib/capture';
 
@@ -78,7 +80,7 @@ export function PhotoSection({ itemId, userId }: { itemId: string; userId: strin
       <View style={styles.grid}>
         {photos?.map((photo) => (
           <Pressable key={photo.id} onPress={() => onPhotoPress(photo.id)}>
-            <View>
+            <View style={styles.tile}>
               <ItemPhoto localUri={photo.local_uri} size={TILE} />
               {armedDelete === photo.id && (
                 <View style={styles.deleteBadge}>
@@ -121,14 +123,21 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 16,
   },
+  // Thin brass frame, 8px radius — clips the photo's own corners too.
+  tile: {
+    borderWidth: 1,
+    borderColor: Palette.brass,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  // Semantic locals — the armed-delete overlay stays error red with white
+  // text on purpose; it is a warning, not a palette moment.
   deleteBadge: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: 'rgba(217,48,37,0.85)',
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
     alignItems: 'center',
     paddingVertical: 2,
   },

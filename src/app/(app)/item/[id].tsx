@@ -13,6 +13,7 @@ import { ActionButton } from '@/components/form';
 import { ItemForm } from '@/components/item-form';
 import { PhotoSection } from '@/components/photo-section';
 import { ThemedView } from '@/components/themed-view';
+import { Spacing } from '@/constants/theme';
 import { deleteItem, updateItem } from '@/db/crud';
 import { useCollection, useItem } from '@/db/hooks';
 import { templateFor } from '@/templates';
@@ -57,7 +58,7 @@ export default function ItemScreen() {
           session ? <PhotoSection itemId={item.id} userId={session.user.id} /> : null
         }
       />
-      <View style={{ padding: 16 }}>
+      <View style={{ padding: Spacing.three }}>
         <ActionButton
           title={confirmingDelete ? 'Really delete? (tap again)' : 'Delete Item'}
           onPress={onDelete}
