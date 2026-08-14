@@ -9,14 +9,11 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+// Estate & Ember accents — brass outline, amber remove affordance — from the
+// shared token palette.
+import { Palette } from '@/constants/theme';
 import { normalizeTags } from '@/db/crud';
 import { useTheme } from '@/hooks/use-theme';
-
-// Constants
-
-// Estate & Ember accents — brass outline, amber remove affordance.
-const BRASS = '#504532';
-const AMBER = '#FFBF00';
 
 // Read-only chip row — renders nothing when there are no tags.
 export function TagChips({ tags }: { tags: string[] }) {
@@ -107,12 +104,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     borderWidth: 1,
-    borderColor: BRASS,
+    borderColor: Palette.brass,
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 4,
   },
-  remove: { color: AMBER, fontWeight: 'bold' },
+  remove: { color: Palette.amber, fontWeight: 'bold' },
   input: {
     borderRadius: 10,
     padding: 12,

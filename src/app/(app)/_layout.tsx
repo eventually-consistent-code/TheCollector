@@ -5,9 +5,12 @@
 
 import { Stack } from 'expo-router';
 
+import { FontFamily } from '@/constants/theme';
+
 export default function AppLayout() {
   return (
-    <Stack>
+    // Serif header titles — the Estate & Ember display voice.
+    <Stack screenOptions={{ headerTitleStyle: { fontFamily: FontFamily.serifBold } }}>
       <Stack.Screen name="index" options={{ title: 'Collections' }} />
       <Stack.Screen name="search" options={{ title: 'Search' }} />
       <Stack.Screen name="collection/new" options={{ title: 'New Collection' }} />

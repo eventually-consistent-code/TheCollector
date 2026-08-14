@@ -12,6 +12,9 @@ import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { TagChips } from '@/components/tag-chips';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+// Estate & Ember accents — brass hairlines, amber values — from the shared
+// token palette (see tag-chips).
+import { Palette } from '@/constants/theme';
 import { parseCustomFields, parseTags } from '@/db/crud';
 import { useSearchItems, type SearchItemRow } from '@/db/hooks';
 import { useTheme } from '@/hooks/use-theme';
@@ -20,10 +23,6 @@ import { centsToDisplay } from '@/lib/money';
 import { subtitleFor, templateFor, type FieldValues } from '@/templates';
 
 // Constants
-
-// Estate & Ember accents — brass hairlines, amber values (see tag-chips).
-const BRASS = '#504532';
-const AMBER = '#FFBF00';
 
 // Quiet window between keystrokes before the watch query re-runs.
 const DEBOUNCE_MS = 250;
@@ -167,7 +166,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   clear: { paddingHorizontal: 4 },
-  clearMark: { color: AMBER, fontSize: 20 },
+  clearMark: { color: Palette.amber, fontSize: 20 },
   list: { padding: 16 },
   count: { marginBottom: 12 },
   empty: { textAlign: 'center', marginTop: 32 },
@@ -177,7 +176,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     gap: 4,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: BRASS,
+    borderColor: Palette.brass,
   },
   label: {
     textTransform: 'uppercase',
@@ -192,5 +191,5 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   name: { flexShrink: 1 },
-  value: { color: AMBER, textAlign: 'right' },
+  value: { color: Palette.amber, textAlign: 'right' },
 });

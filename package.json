@@ -3,6 +3,8 @@
   "main": "expo-router/entry",
   "version": "0.1.0",
   "dependencies": {
+    "@expo-google-fonts/geist": "^0.4.2",
+    "@expo-google-fonts/libre-caslon-text": "^0.4.0",
     "@expo/ui": "~57.0.9",
     "@op-engineering/op-sqlite": "^17.1.5",
     "@powersync/attachments-storage-react-native": "0.0.3",
