@@ -9,4 +9,5 @@
 | 5 | Metadata adapters + barcode scan | verified |
 | 5.5 | Vertical Expansion — Art, Timepieces, Cigars, Books | verified |
 | 6 | Search, filter, sort | pending |
+| 6.5 | Estate & Ember UI — implement Stitch visual system | pending |
 | 7 | Value tracking + stats | pending |
