@@ -10,6 +10,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 
 import { artSearch } from './art.ts';
 import { books } from './books.ts';
+import { cigars } from './cigars.ts';
 import { cachedSearch } from './lookup_cache.ts';
 import { timepiecesSearch } from './thewatchapi.ts';
 
@@ -270,6 +271,10 @@ Deno.serve(async (request) => {
             },
           }),
         );
+      case 'cigars': {
+        const result = await cigars(op, params);
+        return json(result.body, result.status);
+      }
       default:
         return fail(`unknown source: ${source}`, 400);
     }
