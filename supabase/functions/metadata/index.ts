@@ -8,6 +8,8 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
+import { cigars } from './cigars.ts';
+
 // Constants
 
 const USER_AGENT = 'TheCollector/0.1 +https://github.com/eventually-consistent-code/TheCollector';
@@ -225,6 +227,10 @@ Deno.serve(async (request) => {
         return await rebrickable(op, params);
       case 'upc':
         return await upcBridge(params);
+      case 'cigars': {
+        const result = await cigars(op, params);
+        return json(result.body, result.status);
+      }
       default:
         return fail(`unknown source: ${source}`, 400);
     }
