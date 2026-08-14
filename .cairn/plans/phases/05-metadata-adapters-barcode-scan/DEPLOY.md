@@ -1,4 +1,8 @@
-# Phase 5 — cloud deploy checklist (blocked on credentials)
+# Phase 5 — cloud deploy checklist
+
+**Status 2026-08-14:** CLI linked, metadata function DEPLOYED, upc_cache
+applied, CARDSIGHT_API_KEY set. UPC bridge + cardsight live-verified.
+Remaining: the 5 keys below + native rebuilds.
 
 Code is committed and tested; these steps need John's hands (interactive
 login + API accounts). Once done, T7 e2e verify can run.

@@ -78,3 +78,12 @@
 {"ts":"2026-08-14T08:17:20.839Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/CONTEXT.md","error":false}
 {"ts":"2026-08-14T08:17:26.108Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/DEPLOY.md","error":false}
 {"ts":"2026-08-14T08:17:32.008Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx tsc --noEmit && echo \"tsc clean\" && npx jest --silent 2>&1 | tail -5","error":false}
+{"ts":"2026-08-14T08:17:43.190Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"git add -A && git commit -m \"P5 T8: cardsight.ai joins trading-cards adapter (#1","error":false}
+{"ts":"2026-08-14T08:25:08.663Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"ls /Users/jsreed/repos/TheCollector/supabase/functions/.env 2>/dev/null && grep ","error":false}
+{"ts":"2026-08-14T08:29:01.580Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx supabase link --project-ref bbvuyrcuowcmgjtwyqoz 2>&1 | tail -3","error":false}
+{"ts":"2026-08-14T08:29:39.023Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx supabase functions deploy metadata 2>&1 | tail -5","error":false}
+{"ts":"2026-08-14T08:30:04.826Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"grep -q \"^CARDSIGHT_API_KEY=\" supabase/functions/.env && grep -q \"supabase/funct","error":false}
+{"ts":"2026-08-14T08:30:13.529Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx supabase secrets set --env-file supabase/functions/.env 2>&1 | tail -2 && np","error":false}
+{"ts":"2026-08-14T08:30:37.528Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"head -12 /Users/jsreed/repos/TheCollector/.cairn/plans/phases/04-photos/LEDGER.m","error":false}
+{"ts":"2026-08-14T08:30:43.878Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/LEDGER.md","error":false}
+{"ts":"2026-08-14T08:30:48.915Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"gh issue comment 11 --body \"Shipped and live. metadata function deployed, CARDSI","error":false}
