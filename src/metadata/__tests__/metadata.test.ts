@@ -65,10 +65,12 @@ describe('normalizeBarcode', () => {
 // Registry
 
 describe('registry', () => {
-  it('resolves an adapter for every vertical except other', () => {
+  it('resolves an adapter for every vertical except the manual-only set', () => {
+    // Manual entry BY DESIGN — no lookup source (see src/metadata/index.ts).
+    const manualOnly = new Set(['other', 'art', 'timepieces', 'cigars', 'books']);
     for (const template of TEMPLATES) {
       const adapter = getAdapter(template.id);
-      if (template.id === 'other') {
+      if (manualOnly.has(template.id)) {
         expect(adapter).toBeUndefined();
       } else {
         expect(adapter).toBeDefined();

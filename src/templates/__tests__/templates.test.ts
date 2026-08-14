@@ -1,14 +1,14 @@
 /**
  * Purpose: Template registry invariants + display helpers. Cheap tests that
- * keep eight hand-written field tables honest.
+ * keep twelve hand-written field tables honest.
  * Author(s): John Reed
  */
 
 import { TEMPLATES, formatFieldValue, subtitleFor, templateFor } from '../index';
 
 describe('registry invariants', () => {
-  test('nine templates, unique ids', () => {
-    expect(TEMPLATES).toHaveLength(9);
+  test('thirteen templates, unique ids', () => {
+    expect(TEMPLATES).toHaveLength(13);
     const ids = TEMPLATES.map((t) => t.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
@@ -42,6 +42,61 @@ describe('registry invariants', () => {
   });
 
   test('unknown vertical falls back to other', () => {
+    expect(templateFor('does-not-exist').id).toBe('other');
+    expect(templateFor(null).id).toBe('other');
+  });
+});
+
+// Phase 5.5 verticals — one test per template pinning the design calls.
+
+describe('phase 5.5 verticals', () => {
+  test('art carries the manual-entry field set incl. insured value as money', () => {
+    const t = templateFor('art');
+    const byKey = new Map(t.fields.map((f) => [f.key, f]));
+    for (const key of ['artist', 'year', 'medium', 'dimensions', 'provenance', 'exhibition_history', 'insured_value']) {
+      expect(byKey.has(key)).toBe(true);
+    }
+    expect(byKey.get('insured_value')?.type).toBe('money');
+    expect(subtitleFor(t, { artist: 'Rothko', year: 1954 })).toBe('Rothko · 1954');
+  });
+
+  test('timepieces tracks box and papers as booleans', () => {
+    const t = templateFor('timepieces');
+    const byKey = new Map(t.fields.map((f) => [f.key, f]));
+    for (const key of ['brand', 'model', 'reference_number', 'movement', 'case_material', 'case_diameter_mm', 'production_years', 'has_box', 'has_papers']) {
+      expect(byKey.has(key)).toBe(true);
+    }
+    expect(byKey.get('has_box')?.type).toBe('boolean');
+    expect(byKey.get('has_papers')?.type).toBe('boolean');
+    expect(byKey.get('case_diameter_mm')?.type).toBe('number');
+  });
+
+  test('cigars uses selects for vitola and wrapper', () => {
+    const t = templateFor('cigars');
+    const byKey = new Map(t.fields.map((f) => [f.key, f]));
+    for (const key of ['brand', 'line', 'vitola', 'wrapper', 'binder', 'filler', 'ring_gauge', 'length_inches', 'country', 'release_year', 'box_count']) {
+      expect(byKey.has(key)).toBe(true);
+    }
+    expect(byKey.get('vitola')?.type).toBe('select');
+    expect(byKey.get('vitola')?.options).toContain('Robusto');
+    expect(byKey.get('wrapper')?.type).toBe('select');
+    expect(byKey.get('wrapper')?.options).toContain('Maduro');
+  });
+
+  test('books keeps edition/printing as collector-asserted free text', () => {
+    const t = templateFor('books');
+    const byKey = new Map(t.fields.map((f) => [f.key, f]));
+    for (const key of ['author', 'publisher', 'publish_date', 'isbn', 'edition_printing', 'binding', 'signed']) {
+      expect(byKey.has(key)).toBe(true);
+    }
+    // Free text ON PURPOSE — no options, no auto-detection.
+    expect(byKey.get('edition_printing')?.type).toBe('text');
+    expect(byKey.get('edition_printing')?.options).toBeUndefined();
+    expect(byKey.get('signed')?.type).toBe('boolean');
+    expect(subtitleFor(t, { author: 'Le Guin' })).toBe('Le Guin');
+  });
+
+  test('legacy fallback still works with expanded registry', () => {
     expect(templateFor('does-not-exist').id).toBe('other');
     expect(templateFor(null).id).toBe('other');
   });

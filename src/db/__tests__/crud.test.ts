@@ -189,4 +189,21 @@ describe('custom_fields round-trip (template values)', () => {
     row = await db.get<any>('SELECT custom_fields FROM items WHERE id = ?', [id]);
     expect(parseCustomFields(row.custom_fields)).toEqual({ artist: 'Pink Floyd' });
   });
+
+  test('phase 5.5 verticals ride the same opaque JSON path', async () => {
+    // The db layer never learns the new verticals exist — that's the point.
+    const cid = await createCollection(db, { name: 'Watches', vertical: 'timepieces', userId: U1 });
+    const values = {
+      brand: 'Omega',
+      reference_number: '311.30.42.30.01.005',
+      movement: 'Manual Wind',
+      case_diameter_mm: 42,
+      has_box: true,
+      has_papers: false,
+    };
+    const id = await createItem(db, cid, { name: 'Speedmaster Professional', customFields: values }, U1);
+
+    const row = await db.get<any>('SELECT custom_fields FROM items WHERE id = ?', [id]);
+    expect(parseCustomFields(row.custom_fields)).toEqual(values);
+  });
 });
