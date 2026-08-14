@@ -20,6 +20,7 @@ export type ProxySource =
   | 'comicvine'
   | 'rebrickable'
   | 'cardsight'
+  | 'timepieces'
   | 'upc';
 
 export interface ProxyRequest {
