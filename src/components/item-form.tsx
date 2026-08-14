@@ -21,18 +21,21 @@ import type { FieldValues, Template } from '@/templates';
 export function ItemForm({
   template,
   initial,
+  prefill,
   saveLabel,
   onSave,
   footer,
 }: {
   template: Template;
   initial?: ItemRecord;
+  // Scan-to-add seeds — used only when there is no existing row to edit.
+  prefill?: { name?: string; customFields?: FieldValues };
   saveLabel: string;
   onSave: (input: ItemFieldsInput) => void | Promise<void>;
   // Extra content rendered above the save button (e.g. the photo section).
   footer?: ReactNode;
 }) {
-  const [name, setName] = useState(initial?.name ?? '');
+  const [name, setName] = useState(initial?.name ?? prefill?.name ?? '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
   const [acquiredAt, setAcquiredAt] = useState(initial?.acquired_at ?? '');
   const [purchase, setPurchase] = useState(
@@ -45,8 +48,10 @@ export function ItemForm({
       ? centsToDisplay(initial.current_value_cents).slice(1)
       : ''
   );
-  const [custom, setCustom] = useState<FieldValues>(
-    () => parseCustomFields(initial?.custom_fields ?? null) as FieldValues
+  const [custom, setCustom] = useState<FieldValues>(() =>
+    initial?.custom_fields
+      ? (parseCustomFields(initial.custom_fields) as FieldValues)
+      : (prefill?.customFields ?? {})
   );
 
   const save = () =>

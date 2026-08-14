@@ -16,6 +16,7 @@ import { deleteCollection, parseCustomFields, renameCollection } from '@/db/crud
 import { useCollection, useItems } from '@/db/hooks';
 import { useTheme } from '@/hooks/use-theme';
 import { centsToDisplay } from '@/lib/money';
+import { getAdapter } from '@/metadata';
 import { subtitleFor, templateFor, type FieldValues } from '@/templates';
 
 export default function CollectionScreen() {
@@ -120,6 +121,19 @@ export default function CollectionScreen() {
             <ThemedText type="subtitle">+ Add Item</ThemedText>
           </Pressable>
         </Link>
+        {/* Scan only shows where the vertical has a metadata adapter. */}
+        {getAdapter(collection.vertical ?? '') && (
+          <Link href={`/collection/${collection.id}/scan`} asChild>
+            <Pressable
+              style={StyleSheet.flatten([
+                styles.addButton,
+                { backgroundColor: theme.backgroundElement },
+              ])}
+            >
+              <ThemedText type="subtitle">Scan to Add</ThemedText>
+            </Pressable>
+          </Link>
+        )}
         <ActionButton
           title={confirmingDelete ? 'Really delete? (tap again)' : 'Delete Collection'}
           onPress={onDelete}

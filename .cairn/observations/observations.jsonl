@@ -1,0 +1,63 @@
+{"ts":"2026-08-13T22:00:34.000Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"ls /Users/jsreed/repos/TheCollector/.cairn/plans/ 2>/dev/null && cat /Users/jsre","error":false}
+{"ts":"2026-08-13T22:00:44.741Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"find ~/.claude/plugins -path '*cairn*' -name 'SKILL.md' -path '*trailhead*' 2>/d","error":false}
+{"ts":"2026-08-13T22:05:48.765Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"cat /Users/jsreed/repos/TheCollector/cairn.json 2>/dev/null; gh issue list --rep","error":false}
+{"ts":"2026-08-13T22:06:29.366Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/RESEARCH.md","error":false}
+{"ts":"2026-08-13T22:06:42.450Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/CONTEXT.md","error":false}
+{"ts":"2026-08-13T22:06:56.408Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
+{"ts":"2026-08-13T22:07:11.683Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"git add .cairn/plans/phases/05-metadata-adapters-barcode-scan/ && git commit -m ","error":false}
+{"ts":"2026-08-14T07:56:51.474Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"BASE=$(git rev-parse --short HEAD) && echo \"baseCommit: $BASE\" && date +%s && gh","error":false}
+{"ts":"2026-08-14T07:57:49.997Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/types.ts","error":false}
+{"ts":"2026-08-14T07:57:58.078Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/upc.ts","error":false}
+{"ts":"2026-08-14T07:58:09.949Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/proxy.ts","error":false}
+{"ts":"2026-08-14T07:58:35.069Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/fetch.ts","error":false}
+{"ts":"2026-08-14T07:58:47.020Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/vinyl.ts","error":false}
+{"ts":"2026-08-14T07:58:55.960Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/video-games.ts","error":false}
+{"ts":"2026-08-14T07:59:05.827Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/movies.ts","error":false}
+{"ts":"2026-08-14T07:59:14.736Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/comics.ts","error":false}
+{"ts":"2026-08-14T07:59:24.342Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/lego.ts","error":false}
+{"ts":"2026-08-14T07:59:37.638Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/trading-cards.ts","error":false}
+{"ts":"2026-08-14T07:59:49.041Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/bourbon.ts","error":false}
+{"ts":"2026-08-14T08:00:19.253Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/scripts/fetch-funko-data.mjs","error":false}
+{"ts":"2026-08-14T08:00:20.941Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"mkdir -p /Users/jsreed/repos/TheCollector/src/metadata/data && cp /private/tmp/c","error":false}
+{"ts":"2026-08-14T08:00:31.531Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/funko.ts","error":false}
+{"ts":"2026-08-14T08:00:39.568Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/bridge.ts","error":false}
+{"ts":"2026-08-14T08:00:49.773Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/index.ts","error":false}
+{"ts":"2026-08-14T08:01:09.176Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/supabase/metadata.sql","error":false}
+{"ts":"2026-08-14T08:01:36.392Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/supabase/functions/metadata/index.ts","error":false}
+{"ts":"2026-08-14T08:01:52.010Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/tsconfig.json","error":false}
+{"ts":"2026-08-14T08:02:40.967Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/__tests__/metadata.test.ts","error":false}
+{"ts":"2026-08-14T08:02:48.568Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/__tests__/metadata.test.ts","error":false}
+{"ts":"2026-08-14T08:02:48.775Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"cat /Users/jsreed/repos/TheCollector/src/templates/index.ts","error":false}
+{"ts":"2026-08-14T08:02:53.362Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/__tests__/metadata.test.ts","error":false}
+{"ts":"2026-08-14T08:02:54.796Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/__tests__/metadata.test.ts","error":false}
+{"ts":"2026-08-14T08:02:55.852Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/__tests__/metadata.test.ts","error":false}
+{"ts":"2026-08-14T08:03:05.939Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx tsc --noEmit 2>&1 | head -20; echo \"--- tsc exit: $?\"; npx jest src/metadata","error":false}
+{"ts":"2026-08-14T08:03:13.754Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"node /Users/jsreed/repos/TheCollector/scripts/fetch-funko-data.mjs && ls -la /Us","error":false}
+{"ts":"2026-08-14T08:03:14.119Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/funko.ts","error":false}
+{"ts":"2026-08-14T08:03:24.442Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx jest --silent 2>&1 | tail -6 && npx tsc --noEmit && echo \"tsc clean\"","error":false}
+{"ts":"2026-08-14T08:03:36.547Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"ls /Users/jsreed/repos/TheCollector/scripts/ && grep -rn \"psql\\|db push\\|db exec","error":false}
+{"ts":"2026-08-14T08:03:44.351Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx supabase --version 2>&1 | tail -1 && cat /Users/jsreed/repos/TheCollector/su","error":false}
+{"ts":"2026-08-14T08:03:54.590Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"ls -a /Users/jsreed/repos/TheCollector | grep -i env; grep -c . /Users/jsreed/re","error":false}
+{"ts":"2026-08-14T08:04:00.115Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx supabase projects list 2>&1 | head -6","error":false}
+{"ts":"2026-08-14T08:04:17.827Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"gh issue comment 5 --body \"Progress: adapter layer + edge function code landed —","error":false}
+{"ts":"2026-08-14T08:04:50.205Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx expo install expo-camera 2>&1 | tail -3 && grep -A4 'expo-image-picker' app.","error":false}
+{"ts":"2026-08-14T08:04:53.908Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"grep '\"expo-camera\"' /Users/jsreed/repos/TheCollector/package.json && grep -n '\"","error":false}
+{"ts":"2026-08-14T08:04:57.792Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/app.json","error":false}
+{"ts":"2026-08-14T08:05:16.691Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/components/item-form.tsx","error":false}
+{"ts":"2026-08-14T08:05:18.769Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/components/item-form.tsx","error":false}
+{"ts":"2026-08-14T08:05:26.854Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/app/(app)/collection/[id]/new-item.tsx","error":false}
+{"ts":"2026-08-14T08:05:54.546Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/app/(app)/collection/[id]/scan.tsx","error":false}
+{"ts":"2026-08-14T08:06:01.060Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/app/(app)/collection/[id]/index.tsx","error":false}
+{"ts":"2026-08-14T08:06:05.738Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/app/(app)/collection/[id]/index.tsx","error":false}
+{"ts":"2026-08-14T08:06:16.067Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/scan-support.ts","error":false}
+{"ts":"2026-08-14T08:06:19.730Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/app/(app)/collection/[id]/scan.tsx","error":false}
+{"ts":"2026-08-14T08:06:25.850Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/__tests__/metadata.test.ts","error":false}
+{"ts":"2026-08-14T08:06:33.727Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx tsc --noEmit && echo \"tsc clean\" && npx jest --silent 2>&1 | tail -5","error":false}
+{"ts":"2026-08-14T08:06:50.832Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/supabase/functions/.env.example","error":false}
+{"ts":"2026-08-14T08:06:59.425Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/DEPLOY.md","error":false}
+{"ts":"2026-08-14T08:07:04.066Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
+{"ts":"2026-08-14T08:07:06.379Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
+{"ts":"2026-08-14T08:07:07.580Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
+{"ts":"2026-08-14T08:07:08.999Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
+{"ts":"2026-08-14T08:07:10.388Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
+{"ts":"2026-08-14T08:07:11.733Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}
