@@ -11,6 +11,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { artSearch } from './art.ts';
 import { books } from './books.ts';
 import { cachedSearch } from './lookup_cache.ts';
+import { timepiecesSearch } from './thewatchapi.ts';
 
 // Constants
 
@@ -255,6 +256,20 @@ Deno.serve(async (request) => {
         });
       case 'upc':
         return await upcBridge(params);
+      case 'timepieces':
+        // thewatchapi behind the lookup cache; barcode queries hop through
+        // the existing UPC bridge for a title first (see thewatchapi.ts).
+        return json(
+          await timepiecesSearch(params.q ?? params.upc ?? '', {
+            db: adminClient(),
+            apiToken: Deno.env.get('THEWATCHAPI_KEY'),
+            fetchFn: fetch,
+            resolveUpc: async (upc) => {
+              const hit = await upcBridge({ upc });
+              return hit.ok ? ((await hit.json()).title ?? null) : null;
+            },
+          }),
+        );
       default:
         return fail(`unknown source: ${source}`, 400);
     }

@@ -22,6 +22,7 @@ export type ProxySource =
   | 'cardsight'
   | 'art'
   | 'books'
+  | 'timepieces'
   | 'upc';
 
 export interface ProxyRequest {

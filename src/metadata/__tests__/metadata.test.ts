@@ -67,7 +67,7 @@ describe('normalizeBarcode', () => {
 describe('registry', () => {
   it('resolves an adapter for every vertical except the manual-only set', () => {
     // Manual entry BY DESIGN — no lookup source (see src/metadata/index.ts).
-    const manualOnly = new Set(['other', 'timepieces', 'cigars']);
+    const manualOnly = new Set(['other', 'cigars']);
     for (const template of TEMPLATES) {
       const adapter = getAdapter(template.id);
       if (manualOnly.has(template.id)) {
