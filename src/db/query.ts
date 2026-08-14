@@ -1,0 +1,190 @@
+/**
+ * Purpose: Pure query-building logic for the local read layer — sort enum to
+ * ORDER BY strings, LIKE-safe search SQL, and the template-driven filter
+ * compiler. No db imports here; everything is unit-testable standalone, and
+ * hooks.ts feeds the output straight into PowerSync watch queries.
+ * Author(s): John Reed
+ */
+
+import type { FieldDef } from '../templates';
+
+//*************************************************************************
+// Sorting
+//*************************************************************************
+
+// Every way a collection's item list can be ordered.
+export type ItemSort =
+  | 'name_asc'
+  | 'name_desc'
+  | 'newest'
+  | 'oldest'
+  | 'value_desc'
+  | 'value_asc'
+  | 'acquired_desc';
+
+export const DEFAULT_SORT: ItemSort = 'newest';
+
+// SQLite treats NULL as smallest, so a plain DESC would float NULLs around
+// inconsistently; the leading `(col IS NULL)` term pins them last either way.
+const SORT_ORDER_BY: Record<ItemSort, string> = {
+  name_asc: 'name COLLATE NOCASE ASC',
+  name_desc: 'name COLLATE NOCASE DESC',
+  newest: 'created_at DESC',
+  oldest: 'created_at ASC',
+  value_desc: '(current_value_cents IS NULL), current_value_cents DESC',
+  value_asc: '(current_value_cents IS NULL), current_value_cents ASC',
+  acquired_desc: '(acquired_at IS NULL), acquired_at DESC',
+};
+
+// Sort key -> the exact ORDER BY body (no "ORDER BY" prefix).
+export function orderByFor(sort: ItemSort): string {
+  return SORT_ORDER_BY[sort];
+}
+
+//*************************************************************************
+// Search
+//*************************************************************************
+
+// Escape LIKE wildcards in user input so "100%" matches literally.
+// Pair with `LIKE ? ESCAPE '\'` — backslash first, then % and _.
+export function escapeLike(input: string): string {
+  return input.replace(/[\\%_]/g, (ch) => `\\${ch}`);
+}
+
+// Cross-collection search: item name, notes, and custom-field VALUES (never
+// keys — json_each.value only), joined to collections so results can carry
+// the collection's name + vertical for labeling.
+// Returns null for empty/whitespace queries — caller skips the db entirely.
+export function buildSearchQuery(
+  raw: string
+): { sql: string; params: string[] } | null {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const like = `%${escapeLike(trimmed)}%`;
+  const sql =
+    `SELECT items.*, ` +
+    `collections.name AS collection_name, ` +
+    `collections.vertical AS collection_vertical ` +
+    `FROM items ` +
+    `JOIN collections ON collections.id = items.collection_id ` +
+    `WHERE items.name LIKE ? ESCAPE '\\' ` +
+    `OR (items.notes IS NOT NULL AND items.notes LIKE ? ESCAPE '\\') ` +
+    `OR (items.custom_fields IS NOT NULL AND items.custom_fields != '' ` +
+    `AND EXISTS (SELECT 1 FROM json_each(items.custom_fields) ` +
+    `WHERE json_each.value LIKE ? ESCAPE '\\')) ` +
+    `ORDER BY items.name COLLATE NOCASE ASC`;
+
+  return { sql, params: [like, like, like] };
+}
+
+//*************************************************************************
+// Filter compiler
+//*************************************************************************
+
+// A number/money filter — either side optional; both absent means inactive.
+export interface NumberRange {
+  min?: number;
+  max?: number;
+}
+
+// Active value for one template field, keyed by FieldDef.key in FilterState.
+// select -> string, boolean -> boolean, number/money -> NumberRange.
+export type FieldFilterValue = string | boolean | NumberRange;
+
+export interface FilterState {
+  // Per-field active filters; keys are FieldDef.key.
+  fields?: Record<string, FieldFilterValue | undefined>;
+  // Item must carry every listed tag (lowercase strings in items.tags JSON).
+  tags?: readonly string[];
+}
+
+// Compiled WHERE fragment — clauses already AND-joined, ready to append to a
+// base query as `AND (${sql})` when sql is non-empty.
+export interface CompiledFilter {
+  sql: string;
+  params: unknown[];
+}
+
+// Template keys are code-owned constants; still, never let a stray key ride
+// into an embedded JSON path unchecked.
+const SAFE_KEY = /^[A-Za-z0-9_]+$/;
+
+// Compile the active filter state against a template's field defs into
+// parameterized WHERE fragments. Pure — no db, no side effects.
+export function compileFilters(
+  defs: readonly FieldDef[],
+  state: FilterState
+): CompiledFilter {
+  const clauses: string[] = [];
+  const params: unknown[] = [];
+
+  // Field filters, in template-def order so output is deterministic.
+  for (const def of defs) {
+    const value = state.fields?.[def.key];
+    if (value === undefined) {
+      continue;
+    }
+    if (!SAFE_KEY.test(def.key)) {
+      throw new Error(`compileFilters: unsafe field key "${def.key}"`);
+    }
+
+    // Bare json_extract throws "malformed JSON" on rows whose custom_fields
+    // is '' — the json_valid CASE guard turns those into a quiet non-match.
+    const extract =
+      `(CASE WHEN json_valid(custom_fields) ` +
+      `THEN json_extract(custom_fields, '$.${def.key}') END)`;
+
+    switch (def.type) {
+      case 'select': {
+        if (typeof value === 'string') {
+          clauses.push(`${extract} = ?`);
+          params.push(value);
+        }
+        break;
+      }
+
+      case 'boolean': {
+        if (typeof value === 'boolean') {
+          // JSON booleans come back from json_extract as 1/0.
+          clauses.push(`${extract} = ?`);
+          params.push(value ? 1 : 0);
+        }
+        break;
+      }
+
+      case 'number':
+      case 'money': {
+        if (typeof value === 'object' && value !== null) {
+          if (value.min !== undefined) {
+            clauses.push(`${extract} >= ?`);
+            params.push(value.min);
+          }
+          if (value.max !== undefined) {
+            clauses.push(`${extract} <= ?`);
+            params.push(value.max);
+          }
+        }
+        break;
+      }
+
+      // text/date fields filter through search, not here.
+      default:
+        break;
+    }
+  }
+
+  // Tag filters — one EXISTS per tag, all must match. NULL-guarded because
+  // items created before tagging shipped carry NULL tags.
+  for (const tag of state.tags ?? []) {
+    clauses.push(
+      `(items.tags IS NOT NULL AND EXISTS ` +
+        `(SELECT 1 FROM json_each(items.tags) WHERE json_each.value = ?))`
+    );
+    params.push(tag.toLowerCase());
+  }
+
+  return { sql: clauses.join(' AND '), params };
+}
