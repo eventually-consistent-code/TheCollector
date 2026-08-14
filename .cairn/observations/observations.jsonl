@@ -107,3 +107,28 @@
 {"ts":"2026-08-14T09:20:57.467Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/CONTEXT.md","error":false}
 {"ts":"2026-08-14T09:20:59.614Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/DEPLOY.md","error":false}
 {"ts":"2026-08-14T09:21:09.915Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"grep -v '^TMDB_ACCESS_TOKEN=' supabase/functions/.env > supabase/functions/.env.","error":false}
+{"ts":"2026-08-14T09:21:30.003Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx supabase functions deploy metadata 2>&1 | tail -2 && git add -A && git commi","error":false}
+{"ts":"2026-08-14T09:23:03.498Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"echo \"OMDB_API_KEY=2de218c6\" >> supabase/functions/.env && npx supabase secrets ","error":false}
+{"ts":"2026-08-14T09:23:51.911Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"grep -A1 \"NSCameraUsageDescription\\|NSPhotoLibraryUsageDescription\" ios/TheColle","error":false}
+{"ts":"2026-08-14T09:24:03.001Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"grep -n \"^/ios\\|^ios\\|^/android\\|^android\" .gitignore; find ios -name Info.plist","error":false}
+{"ts":"2026-08-14T09:24:31.091Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx expo prebuild -p ios --clean 2>&1 | tail -4","error":false}
+{"ts":"2026-08-14T09:24:34.008Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"grep -A1 \"NSCameraUsageDescription\" ios/TheCollector/Info.plist","error":false}
+{"ts":"2026-08-14T09:24:39.283Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx expo run:ios --no-bundler 2>&1 | tail -30","error":false}
+{"ts":"2026-08-14T09:27:19.689Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx expo start --dev-client --port 8081 2>&1 | head -60","error":false}
+{"ts":"2026-08-14T09:28:26.810Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx expo prebuild -p android --clean 2>&1 | tail -2 && adb devices 2>/dev/null |","error":false}
+{"ts":"2026-08-14T09:28:42.479Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"$HOME/Library/Android/sdk/emulator/emulator -avd Pixel_10_Pro -no-snapshot-save ","error":false}
+{"ts":"2026-08-14T09:28:42.881Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx expo run:android --no-bundler 2>&1 | tail -30","error":false}
+{"ts":"2026-08-14T09:29:02.529Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"nohup $HOME/Library/Android/sdk/emulator/emulator -avd Pixel_10_Pro -no-snapshot","error":false}
+{"ts":"2026-08-14T09:29:25.434Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx expo run:android --no-bundler 2>&1 | tail -25","error":false}
+{"ts":"2026-08-14T09:30:09.688Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"export JAVA_HOME=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\" &","error":false}
+{"ts":"2026-08-14T09:30:45.473Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/android/local.properties","error":false}
+{"ts":"2026-08-14T09:30:50.352Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"export JAVA_HOME=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\" &","error":false}
+{"ts":"2026-08-14T09:32:58.113Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/.claude/projects/-Users-jsreed-repos-TheCollector/memory/android-build-jdk21.md","error":false}
+{"ts":"2026-08-14T09:32:59.165Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"echo '- [Android build JDK21 gotcha](android-build-jdk21.md) — JBR 25 breaks CMa","error":false}
+{"ts":"2026-08-14T09:36:46.240Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"nohup npx expo start --dev-client --port 8081 > /private/tmp/claude-502/-Users-j","error":false}
+{"ts":"2026-08-14T09:38:41.469Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"npx jest --silent 2>&1 | tail -4 && npx tsc --noEmit && echo \"tsc clean\" && gh i","error":false}
+{"ts":"2026-08-14T09:38:56.655Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"gh issue comment 6 --body \"Shipped and user-verified on iOS: Scan to Add → manua","error":false}
+{"ts":"2026-08-14T09:39:17.908Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/VERIFICATION.md","error":false}
+{"ts":"2026-08-14T09:39:19.189Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/roadmap.md","error":false}
+{"ts":"2026-08-14T09:39:25.666Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/LEDGER.md","error":false}
+{"ts":"2026-08-14T09:39:27.079Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/PLAN.md","error":false}

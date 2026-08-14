@@ -40,7 +40,7 @@ then adapters, then scan UI on top.
       function (`/v1/catalog/search`, X-API-Key server-side), merged into the
       trading-cards adapter ahead of Pokémon/Scryfall — covers the
       sports-card gap. `CARDSIGHT_API_KEY` added to secrets checklist. (#11)
-- [ ] T7 — Verify: scan a real UPC on Android + iOS dev client → prefilled
+- [x] T7 — Verify: scan a real UPC on Android + iOS dev client → prefilled
       item; web Chromium scan + web Safari manual-entry fallback; Discogs
       barcode path end-to-end; keyed sources return data through the proxy
       with no secret in client bundle; UPC cache row written once. (#5, #6)
