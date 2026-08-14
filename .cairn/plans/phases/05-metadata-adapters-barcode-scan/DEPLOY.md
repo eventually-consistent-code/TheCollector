@@ -25,7 +25,7 @@ SQL editor (project bbvuyrcuowcmgjtwyqoz), or `psql "$DB_URL" -f supabase/metada
 |---|---|
 | `DISCOGS_KEY` / `DISCOGS_SECRET` | discogs.com/settings/developers — create app |
 | `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` | dev.twitch.tv/console — register app (IGDB) |
-| `TMDB_ACCESS_TOKEN` | themoviedb.org/settings/api — API Read Access Token |
+| `OMDB_API_KEY` | omdbapi.com/apikey.aspx — free tier 1,000/day (emailed key) |
 | `COMICVINE_API_KEY` | comicvine.gamespot.com/api — free key |
 | `REBRICKABLE_API_KEY` | rebrickable.com/api — free key |
 | `CARDSIGHT_API_KEY` | cardsight.ai — free tier 750 calls/mo |

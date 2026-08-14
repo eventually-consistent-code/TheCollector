@@ -112,14 +112,16 @@ async function cardsight(params: Record<string, string>): Promise<Response> {
   return json(await response.json());
 }
 
-async function tmdb(params: Record<string, string>): Promise<Response> {
-  const url = new URL('https://api.themoviedb.org/3/search/movie');
-  url.searchParams.set('query', params.q ?? '');
+// OMDb over TMDB: TMDB's commercial license runs ~$150/mo; OMDb's free tier
+// (1,000/day) and cheap patron tiers fit a commercial app.
+async function omdb(params: Record<string, string>): Promise<Response> {
+  const url = new URL('https://www.omdbapi.com/');
+  url.searchParams.set('apikey', env('OMDB_API_KEY'));
+  url.searchParams.set('s', params.q ?? '');
+  url.searchParams.set('type', 'movie');
 
-  const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${env('TMDB_ACCESS_TOKEN')}` },
-  });
-  if (!response.ok) return fail(`tmdb ${response.status}`, response.status);
+  const response = await fetch(url);
+  if (!response.ok) return fail(`omdb ${response.status}`, response.status);
   return json(await response.json());
 }
 
@@ -215,8 +217,8 @@ Deno.serve(async (request) => {
         return await igdb(params);
       case 'cardsight':
         return await cardsight(params);
-      case 'tmdb':
-        return await tmdb(params);
+      case 'omdb':
+        return await omdb(params);
       case 'comicvine':
         return await comicvine(params);
       case 'rebrickable':

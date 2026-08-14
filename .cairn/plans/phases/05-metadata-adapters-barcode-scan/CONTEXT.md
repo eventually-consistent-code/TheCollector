@@ -23,7 +23,7 @@
 - **Edge function**: single `metadata` function with source routing
   (`{source, op, params}`), secrets via `supabase secrets set`, called with
   `supabase.functions.invoke`. Proxied sources: Discogs, IGDB (Twitch OAuth
-  token managed server-side), TMDB, Comic Vine, Rebrickable, UPCitemdb
+  token managed server-side), OMDb, Comic Vine, Rebrickable, UPCitemdb
   bridge. Direct-from-client: Scryfall (no key), Pokémon TCG (keyless tier),
   Open Food Facts, Funko static.
 - **Funko**: ingest `kennymkchan/funko-pop-data` JSON (MIT, deprecated
@@ -31,6 +31,11 @@
   popiq.dev flagged for later evaluation, not this phase.
 - **Bourbon**: TheCocktailDB dropped (recipes, not bottles). Open Food Facts
   by barcode + manual entry fallback.
+- **OMDb over TMDB (swapped 2026-08-14, post-deploy)**: TMDB's commercial
+  license runs ~$150/mo; the collector is headed commercial. OMDb free tier
+  (1,000/day) + patron tiers instead. TMDB adapter/secret removed. NOTE:
+  verify OMDb's own commercial/licensing terms before launch — flagged, not
+  yet vetted.
 - **Sports cards, and any vertical with no barcode hit**: scan falls back to
   template-driven manual entry prefilled with whatever the bridge returned
   (title at minimum).

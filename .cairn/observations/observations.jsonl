@@ -96,3 +96,14 @@
 {"ts":"2026-08-14T09:18:00.817Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"gh issue comment 5 --body \"Complete and live. All sources verified through the d","error":false}
 {"ts":"2026-08-14T09:18:07.165Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/LEDGER.md","error":false}
 {"ts":"2026-08-14T09:18:10.145Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/DEPLOY.md","error":false}
+{"ts":"2026-08-14T09:18:13.886Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"git add .cairn && git commit -m \"Ledger: phase 5 issue #5 closed; all metadata s","error":false}
+{"ts":"2026-08-14T09:20:20.809Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/supabase/functions/metadata/index.ts","error":false}
+{"ts":"2026-08-14T09:20:22.302Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/supabase/functions/metadata/index.ts","error":false}
+{"ts":"2026-08-14T09:20:22.751Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/proxy.ts","error":false}
+{"ts":"2026-08-14T09:20:32.853Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Write","target":"/Users/jsreed/repos/TheCollector/src/metadata/adapters/movies.ts","error":false}
+{"ts":"2026-08-14T09:20:36.189Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/supabase/functions/.env.example","error":false}
+{"ts":"2026-08-14T09:20:48.046Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/src/metadata/__tests__/metadata.test.ts","error":false}
+{"ts":"2026-08-14T09:20:50.716Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/CONTEXT.md","error":false}
+{"ts":"2026-08-14T09:20:57.467Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/CONTEXT.md","error":false}
+{"ts":"2026-08-14T09:20:59.614Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Edit","target":"/Users/jsreed/repos/TheCollector/.cairn/plans/phases/05-metadata-adapters-barcode-scan/DEPLOY.md","error":false}
+{"ts":"2026-08-14T09:21:09.915Z","session_id":"724f176a-cd7f-4c7b-bb36-61b87089ffa1","tool":"Bash","target":"grep -v '^TMDB_ACCESS_TOKEN=' supabase/functions/.env > supabase/functions/.env.","error":false}

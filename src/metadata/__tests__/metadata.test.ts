@@ -230,6 +230,45 @@ describe('lego adapter', () => {
   });
 });
 
+// OMDb (movies, proxied)
+
+describe('movies adapter', () => {
+  const { moviesAdapter } = require('../adapters/movies');
+
+  it('maps OMDb search hits and drops N/A posters', async () => {
+    invoke.mockResolvedValue({
+      data: {
+        Response: 'True',
+        Search: [
+          { Title: 'Jurassic Park', Year: '1993', Poster: 'https://m.media-amazon.com/x.jpg' },
+          { Title: 'Obscure Film', Year: '2001', Poster: 'N/A' },
+        ],
+      },
+      error: null,
+    });
+
+    const results = await moviesAdapter.searchByText('jurassic park');
+
+    expect(results).toHaveLength(2);
+    expect(results[0]).toMatchObject({
+      title: 'Jurassic Park',
+      source: 'OMDb',
+      imageUrl: 'https://m.media-amazon.com/x.jpg',
+      fields: { release_year: 1993 },
+    });
+    expect(results[1].imageUrl).toBeUndefined();
+    expect(invoke).toHaveBeenCalledWith('metadata', {
+      body: { source: 'omdb', op: 'search', params: { q: 'jurassic park' } },
+    });
+  });
+
+  it('treats Response:False as no results', async () => {
+    invoke.mockResolvedValue({ data: { Response: 'False', Error: 'Movie not found!' }, error: null });
+
+    await expect(moviesAdapter.searchByText('zzzz')).resolves.toEqual([]);
+  });
+});
+
 // CardSight (trading cards, proxied)
 
 describe('trading-cards adapter — cardsight', () => {

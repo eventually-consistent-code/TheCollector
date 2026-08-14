@@ -16,7 +16,7 @@ import { supabase } from '@/auth/client';
 export type ProxySource =
   | 'discogs'
   | 'igdb'
-  | 'tmdb'
+  | 'omdb'
   | 'comicvine'
   | 'rebrickable'
   | 'cardsight'
