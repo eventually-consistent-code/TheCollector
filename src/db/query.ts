@@ -265,3 +265,31 @@ export const DISTINCT_TAGS_SQL =
   `AND tags IS NOT NULL AND json_valid(tags)) AS tagged, ` +
   `json_each(tagged.tags) ` +
   `ORDER BY tag`;
+
+//*************************************************************************
+// Dashboard rollups
+//*************************************************************************
+
+// Portfolio hero numbers — one row, whole archive. COALESCE keeps the sum
+// at 0 (not NULL) when no item carries a value yet.
+export const DASHBOARD_TOTALS_SQL =
+  `SELECT COUNT(*) AS item_count, ` +
+  `COALESCE(SUM(current_value_cents), 0) AS total_value_cents ` +
+  `FROM items`;
+
+// Per-vertical rollup for the dashboard grid, richest shelf first. LEFT
+// JOIN so a fresh collection with zero items still gets a card; COUNT(i.id)
+// (not COUNT(*)) keeps that empty vertical honest at 0.
+export const VERTICAL_BREAKDOWN_SQL =
+  `SELECT c.vertical, COUNT(i.id) AS item_count, ` +
+  `COALESCE(SUM(i.current_value_cents), 0) AS value_cents ` +
+  `FROM collections c ` +
+  `LEFT JOIN items i ON i.collection_id = c.id ` +
+  `GROUP BY c.vertical ` +
+  `ORDER BY value_cents DESC`;
+
+// Newest catalogued items across every collection, each with its
+// first-photo thumb riding along. One param: the row limit.
+export const RECENT_ITEMS_SQL =
+  `SELECT items.*, ${FIRST_PHOTO_URI_SQL} AS thumb_uri ` +
+  `FROM items ORDER BY created_at DESC LIMIT ?`;

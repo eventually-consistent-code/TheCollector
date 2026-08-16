@@ -12,6 +12,9 @@ import {
   orderByFor,
   DEFAULT_SORT,
   DISTINCT_TAGS_SQL,
+  DASHBOARD_TOTALS_SQL,
+  VERTICAL_BREAKDOWN_SQL,
+  RECENT_ITEMS_SQL,
 } from './query';
 import type { ItemListFilter, ItemSort } from './query';
 import type { CollectionRecord, ItemRecord } from './schema';
@@ -93,4 +96,33 @@ export function useFilteredItems(
 // bar's tag chips come from here.
 export function useCollectionTags(collectionId: string | undefined) {
   return useQuery<{ tag: string }>(DISTINCT_TAGS_SQL, [collectionId ?? null]);
+}
+
+// Portfolio hero numbers — one row: how many items, worth how much.
+export type DashboardTotals = {
+  item_count: number;
+  total_value_cents: number;
+};
+
+// One dashboard-grid card per vertical: count + rolled-up value.
+export type VerticalBreakdownRow = {
+  vertical: string;
+  item_count: number;
+  value_cents: number;
+};
+
+// Whole-archive totals for the dashboard's portfolio hero.
+export function useDashboardTotals() {
+  return useQuery<DashboardTotals>(DASHBOARD_TOTALS_SQL);
+}
+
+// Per-vertical rollup for the dashboard grid, richest shelf first.
+export function useVerticalBreakdown() {
+  return useQuery<VerticalBreakdownRow>(VERTICAL_BREAKDOWN_SQL);
+}
+
+// Newest catalogued items across every collection — the dashboard's
+// "Recently Cataloged" rail. Rows reuse ItemListRow (item + thumb_uri).
+export function useRecentItems(limit = 5) {
+  return useQuery<ItemListRow>(RECENT_ITEMS_SQL, [limit]);
 }
