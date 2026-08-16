@@ -13,10 +13,18 @@ import { signOutAndClear } from '@/db/sync';
 
 // Status semantics, not Estate & Ember decor — green means healthy sync and
 // gray means offline on any theme, so these stay out of the palette.
-const DOT_CONNECTED = '#34A853';
-const DOT_OFFLINE = '#9AA0A6';
+// Exported so Profile's sync card speaks the same color language.
+export const DOT_CONNECTED = '#34A853';
+export const DOT_OFFLINE = '#9AA0A6';
 
-export function SyncStatusBar() {
+interface SyncStatusBarProps {
+  // Sign-out now lives on the Profile tab too — Vault keeps the button for
+  // now (default true preserves today's behavior); a follow-up may toggle
+  // it off once Profile is the established home for it.
+  showSignOut?: boolean;
+}
+
+export function SyncStatusBar({ showSignOut = true }: SyncStatusBarProps = {}) {
   const db = usePowerSync();
   const status = useStatus();
 
@@ -37,11 +45,13 @@ export function SyncStatusBar() {
         {label}
         {err ? ` — ${String(err).slice(0, 120)}` : ''}
       </ThemedText>
-      <Pressable hitSlop={8} onPress={() => signOutAndClear(db)}>
-        <ThemedText themeColor="textSecondary" style={Type.label}>
-          Sign out
-        </ThemedText>
-      </Pressable>
+      {showSignOut ? (
+        <Pressable hitSlop={8} onPress={() => signOutAndClear(db)}>
+          <ThemedText themeColor="textSecondary" style={Type.label}>
+            Sign out
+          </ThemedText>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
