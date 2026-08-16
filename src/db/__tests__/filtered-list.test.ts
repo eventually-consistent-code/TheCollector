@@ -15,6 +15,7 @@ import {
   buildItemsQuery,
   compileFilters,
   DISTINCT_TAGS_SQL,
+  FIRST_PHOTO_URI_SQL,
 } from '../query';
 import { AppSchema } from '../schema';
 import type { FieldDef } from '../../templates';
@@ -28,10 +29,13 @@ const DEFS: readonly FieldDef[] = [
 // Pure tests — no db
 //*************************************************************************
 
+// Every list SELECT leads with the item columns plus the first-photo thumb.
+const SELECT_HEAD = `SELECT items.*, ${FIRST_PHOTO_URI_SQL} AS thumb_uri FROM items`;
+
 describe('buildItemsQuery', () => {
-  test('no filter compiles to the exact plain useItems query', () => {
+  test('no filter compiles to the plain useItems query plus thumb_uri', () => {
     expect(buildItemsQuery('c1', 'newest')).toEqual({
-      sql: `SELECT * FROM items WHERE collection_id = ? ORDER BY created_at DESC`,
+      sql: `${SELECT_HEAD} WHERE collection_id = ? ORDER BY created_at DESC`,
       params: ['c1'],
     });
   });
@@ -41,7 +45,7 @@ describe('buildItemsQuery', () => {
       compiled: { sql: '', params: [] },
     });
     expect(out.sql).toBe(
-      `SELECT * FROM items WHERE collection_id = ? ORDER BY name COLLATE NOCASE ASC`
+      `${SELECT_HEAD} WHERE collection_id = ? ORDER BY name COLLATE NOCASE ASC`
     );
     expect(out.params).toEqual(['c1']);
   });
@@ -53,7 +57,7 @@ describe('buildItemsQuery', () => {
       value: { min: 100, max: 5000 },
     });
     expect(out.sql).toBe(
-      `SELECT * FROM items WHERE collection_id = ? ` +
+      `${SELECT_HEAD} WHERE collection_id = ? ` +
         `AND current_value_cents >= ? AND current_value_cents <= ? ` +
         `AND (${compiled.sql}) ` +
         `ORDER BY (current_value_cents IS NULL), current_value_cents DESC`
@@ -181,5 +185,24 @@ describe('filtered list SQL runs on a real PowerSync db', () => {
     expect(
       await run(buildItemsQuery('c1', 'value_asc', { compiled: tagged }))
     ).toEqual(['i2', 'i1']);
+  });
+
+  test('rows carry thumb_uri; photo-less rows stay NULL; counts hold', async () => {
+    // Seed one renderable photo on i1 — the subquery must decorate that row
+    // only, without duplicating or dropping anything.
+    await db.execute(
+      `INSERT INTO photos (id, user_id, item_id, created_at)
+       VALUES ('ph1', 'u1', 'i1', '2026-08-01')`
+    );
+    await db.execute(
+      `INSERT INTO attachments (id, filename, local_uri, state, timestamp)
+       VALUES ('ph1', 'ph1.jpg', 'file:///photos/ph1.jpg', 3, 1)`
+    );
+
+    const out = buildItemsQuery('c1', 'name_asc');
+    const rows = await db.getAll<any>(out.sql, out.params as any[]);
+    expect(rows.map((r) => r.id)).toEqual(['i1', 'i2', 'i3', 'i4']);
+    expect(rows[0].thumb_uri).toBe('file:///photos/ph1.jpg');
+    expect(rows.slice(1).map((r) => r.thumb_uri)).toEqual([null, null, null]);
   });
 });

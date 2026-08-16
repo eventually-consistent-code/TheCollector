@@ -17,6 +17,7 @@ import {
   escapeLike,
   orderByFor,
   DEFAULT_SORT,
+  FIRST_PHOTO_URI_SQL,
 } from '../query';
 import type { ItemSort } from '../query';
 import { AppSchema } from '../schema';
@@ -82,6 +83,15 @@ describe('buildSearchQuery', () => {
     const built = buildSearchQuery('grail')!;
     expect(built.sql).toContain('json_valid(items.tags)');
     expect(built.sql).toContain('json_each(items.tags)');
+  });
+
+  test('selects the first-photo local_uri as thumb_uri via scalar subquery', () => {
+    const built = buildSearchQuery('mint')!;
+    expect(built.sql).toContain(`${FIRST_PHOTO_URI_SQL} AS thumb_uri`);
+    // Scalar subquery, not a join — result stays one row per item.
+    expect(FIRST_PHOTO_URI_SQL).toContain('LIMIT 1');
+    // Renderable photos outrank newer-but-unfetched ones.
+    expect(FIRST_PHOTO_URI_SQL).toContain('(a.local_uri IS NULL), p.created_at DESC');
   });
 });
 
@@ -340,5 +350,42 @@ describe('generated SQL runs on a real PowerSync db', () => {
     // NULLs trail in both directions.
     expect(new Set(asc.slice(2).map((r) => r.id))).toEqual(new Set(['i2', 'i3']));
     expect(new Set(desc.slice(2).map((r) => r.id))).toEqual(new Set(['i2', 'i3']));
+  });
+
+  test('search rows carry thumb_uri from the first renderable photo — one row per item', async () => {
+    // Two photos on i1: the newest has no attachment/local_uri yet (still in
+    // flight), the older one is renderable — thumb_uri falls back to it.
+    await db.execute(
+      `INSERT INTO photos (id, user_id, item_id, created_at)
+       VALUES ('p_old', 'u1', 'i1', '2026-08-01')`
+    );
+    await db.execute(
+      `INSERT INTO photos (id, user_id, item_id, created_at)
+       VALUES ('p_new', 'u1', 'i1', '2026-08-02')`
+    );
+    await db.execute(
+      `INSERT INTO attachments (id, filename, local_uri, state, timestamp)
+       VALUES ('p_old', 'p_old.jpg', 'file:///photos/p_old.jpg', 3, 1)`
+    );
+
+    const rows = await search('blue tra');
+    // Scalar subquery must not fan the item out into one row per photo.
+    expect(rows).toHaveLength(1);
+    expect(rows[0].thumb_uri).toBe('file:///photos/p_old.jpg');
+  });
+
+  test('newest photo wins once it becomes renderable', async () => {
+    await db.execute(
+      `INSERT INTO attachments (id, filename, local_uri, state, timestamp)
+       VALUES ('p_new', 'p_new.jpg', 'file:///photos/p_new.jpg', 3, 1)`
+    );
+    const rows = await search('blue tra');
+    expect(rows[0].thumb_uri).toBe('file:///photos/p_new.jpg');
+  });
+
+  test('items without photos search with a NULL thumb_uri', async () => {
+    const rows = await search('100%');
+    expect(rows).toHaveLength(1);
+    expect(rows[0].thumb_uri).toBeNull();
   });
 });
