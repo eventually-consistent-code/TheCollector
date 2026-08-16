@@ -16,32 +16,44 @@ import { Palette } from '@/constants/theme';
 // Row-scale thumbnail — small enough to keep the tray cards compact.
 export const THUMB_SIZE = 60;
 
-export function ItemThumb({ uri }: { uri: string | null }) {
+export function ItemThumb({
+  uri,
+  size = THUMB_SIZE,
+}: {
+  uri: string | null;
+  // Frame edge in px — defaults to row scale; the Vault's collection
+  // covers step it up a notch without a second component.
+  size?: number;
+}) {
+  const frameSize = { width: size, height: size };
+
   if (!uri) {
     // No photo (or none renderable yet): a deep recess in the card with a
     // faint bordered diamond — an empty display mount, not an error.
     return (
-      <View style={[styles.frame, styles.placeholder]} testID="item-thumb-placeholder">
+      <View
+        style={[styles.frame, styles.placeholder, frameSize]}
+        testID="item-thumb-placeholder"
+      >
         <View style={styles.diamond} />
       </View>
     );
   }
 
   return (
-    <View style={styles.frame} testID="item-thumb-photo">
+    <View style={[styles.frame, frameSize]} testID="item-thumb-photo">
       {/* Inner photo sized to the frame's content box; the frame's 8px
           radius + overflow hidden clips the image corners to match. */}
-      <ItemPhoto localUri={uri} size={THUMB_SIZE - 2} />
+      <ItemPhoto localUri={uri} size={size - 2} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   // Thin brass frame, 8px radius — same framed-plate treatment as the
-  // item screen's photo grid, scaled down to row density.
+  // item screen's photo grid, scaled down to row density. Width/height
+  // ride the size prop at render time.
   frame: {
-    width: THUMB_SIZE,
-    height: THUMB_SIZE,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: Palette.brass,
