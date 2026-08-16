@@ -1,11 +1,11 @@
 /**
- * Purpose: Collections screen — live list with item counts, entry point for
- * creating a collection.
+ * Purpose: The Vault — live collections list with item counts, entry point
+ * for creating a collection. Lives on the tab shell now.
  * Author(s): John Reed
  */
 
 import { useQuery } from '@powersync/react';
-import { Link, Stack } from 'expo-router';
+import { Link, Tabs } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
 import { SyncStatusBar } from '@/components/sync-status';
@@ -30,7 +30,7 @@ export default function CollectionsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen
+      <Tabs.Screen
         options={{
           // Header entry point into cross-collection search.
           headerRight: () => (
