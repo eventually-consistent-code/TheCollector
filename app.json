@@ -8,7 +8,6 @@
     "scheme": "thecollector",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.anonymous.thecollector"
     },
     "android": {
