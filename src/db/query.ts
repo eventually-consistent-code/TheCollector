@@ -58,6 +58,19 @@ export const FIRST_PHOTO_URI_SQL =
   `WHERE p.item_id = items.id ` +
   `ORDER BY (a.local_uri IS NULL), p.created_at DESC LIMIT 1)`;
 
+// Collection-level cousin of FIRST_PHOTO_URI_SQL: hop through the
+// collection's items to its newest renderable photo, riding along on the
+// Vault's collections SELECT as `cover_uri`. Same ordering twist — photos
+// whose attachment has no local_uri yet can't render, so anything with
+// bytes on disk sorts ahead. Correlates on `collections.id`, so the outer
+// query must select FROM collections unaliased.
+export const COLLECTION_COVER_URI_SQL =
+  `(SELECT a.local_uri FROM items i2 ` +
+  `JOIN photos p ON p.item_id = i2.id ` +
+  `LEFT JOIN attachments a ON a.id = p.id ` +
+  `WHERE i2.collection_id = collections.id ` +
+  `ORDER BY (a.local_uri IS NULL), p.created_at DESC LIMIT 1)`;
+
 //*************************************************************************
 // Search
 //*************************************************************************
