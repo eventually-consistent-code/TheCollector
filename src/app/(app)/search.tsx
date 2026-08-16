@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
 import { StationeryInput } from '@/components/form';
+import { ItemThumb } from '@/components/item-thumb';
 import { TagChips } from '@/components/tag-chips';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -47,25 +48,29 @@ function ResultRow({ item }: { item: SearchItemRow }) {
           { backgroundColor: theme.surfaceRaised },
         ])}
       >
-        <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
-          {template.label} · {item.collection_name}
-        </ThemedText>
-        <View style={styles.nameRow}>
-          <ThemedText type="subtitle" style={styles.name} numberOfLines={1}>
-            {item.name}
+        {/* First photo (or placeholder) leads; text block rides beside it. */}
+        <ItemThumb uri={item.thumb_uri} />
+        <View style={styles.cardBody}>
+          <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
+            {template.label} · {item.collection_name}
           </ThemedText>
-          {item.current_value_cents != null && (
-            <ThemedText type="smallBold" style={styles.value}>
-              {centsToDisplay(item.current_value_cents)}
+          <View style={styles.nameRow}>
+            <ThemedText type="subtitle" style={styles.name} numberOfLines={1}>
+              {item.name}
+            </ThemedText>
+            {item.current_value_cents != null && (
+              <ThemedText type="smallBold" style={styles.value}>
+                {centsToDisplay(item.current_value_cents)}
+              </ThemedText>
+            )}
+          </View>
+          {subtitle !== null && (
+            <ThemedText type="small" themeColor="textSecondary">
+              {subtitle}
             </ThemedText>
           )}
+          {tags.length > 0 && <TagChips tags={tags} />}
         </View>
-        {subtitle !== null && (
-          <ThemedText type="small" themeColor="textSecondary">
-            {subtitle}
-          </ThemedText>
-        )}
-        {tags.length > 0 && <TagChips tags={tags} />}
       </Pressable>
     </Link>
   );
@@ -161,15 +166,19 @@ const styles = StyleSheet.create({
   list: { padding: 16 },
   count: { marginBottom: 12 },
   empty: { textAlign: 'center', marginTop: 32 },
-  // Collector's tray — raised surface, brass hairline, 8px radius.
+  // Collector's tray — raised surface, brass hairline, 8px radius. Now a
+  // row: thumb on the left, the original text stack to its right.
   card: {
     borderRadius: 8,
     padding: 16,
     marginBottom: 12,
-    gap: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: Palette.brass,
   },
+  cardBody: { flex: 1, gap: 4 },
   label: {
     ...Type.label,
     fontSize: 11,

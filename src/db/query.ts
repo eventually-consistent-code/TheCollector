@@ -42,6 +42,23 @@ export function orderByFor(sort: ItemSort): string {
 }
 
 //*************************************************************************
+// First-photo thumbnail
+//*************************************************************************
+
+// Correlated scalar subquery: one photo's local_uri per item, riding along
+// on the list/search SELECTs as `thumb_uri`. One statement for the whole
+// list — no per-row hook, no N+1 query storm — and PowerSync's watch picks
+// up the photos/attachments tables from the plan, so rows go live when a
+// photo lands. "First" mirrors the item screen's photo grid (newest first),
+// with one twist: photos whose attachment has no local_uri yet can't render,
+// so anything renderable sorts ahead of them instead of showing a blank.
+export const FIRST_PHOTO_URI_SQL =
+  `(SELECT a.local_uri FROM photos p ` +
+  `LEFT JOIN attachments a ON a.id = p.id ` +
+  `WHERE p.item_id = items.id ` +
+  `ORDER BY (a.local_uri IS NULL), p.created_at DESC LIMIT 1)`;
+
+//*************************************************************************
 // Search
 //*************************************************************************
 
@@ -67,7 +84,8 @@ export function buildSearchQuery(
   const sql =
     `SELECT items.*, ` +
     `collections.name AS collection_name, ` +
-    `collections.vertical AS collection_vertical ` +
+    `collections.vertical AS collection_vertical, ` +
+    `${FIRST_PHOTO_URI_SQL} AS thumb_uri ` +
     `FROM items ` +
     `JOIN collections ON collections.id = items.collection_id ` +
     `WHERE items.name LIKE ? ESCAPE '\\' ` +
@@ -205,9 +223,9 @@ export interface ItemListFilter {
   value?: NumberRange;
 }
 
-// Full SELECT for one collection's item list with filters + sort applied.
-// Pure — collectionId rides in params, never in the SQL string. No filter
-// argument compiles to the exact query useItems has always run.
+// Full SELECT for one collection's item list with filters + sort applied,
+// plus each row's first-photo thumb_uri (see FIRST_PHOTO_URI_SQL). Pure —
+// collectionId rides in params, never in the SQL string.
 export function buildItemsQuery(
   collectionId: string | null,
   sort: ItemSort,
@@ -231,7 +249,8 @@ export function buildItemsQuery(
   }
 
   const sql =
-    `SELECT * FROM items WHERE ${clauses.join(' AND ')} ` +
+    `SELECT items.*, ${FIRST_PHOTO_URI_SQL} AS thumb_uri ` +
+    `FROM items WHERE ${clauses.join(' AND ')} ` +
     `ORDER BY ${orderByFor(sort)}`;
   return { sql, params };
 }

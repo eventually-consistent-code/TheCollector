@@ -16,6 +16,7 @@ import {
   toItemListFilter,
   type ItemFilterState,
 } from '@/components/item-filter-state';
+import { ItemThumb } from '@/components/item-thumb';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { FontFamily, Spacing, Type } from '@/constants/theme';
@@ -134,6 +135,8 @@ export default function CollectionScreen() {
                 ])}
               >
                 <View style={styles.cardRow}>
+                  {/* First photo (or placeholder) leads the row. */}
+                  <ItemThumb uri={item.thumb_uri} />
                   <View style={styles.cardMain}>
                     <ThemedText style={styles.cardName}>{item.name}</ThemedText>
                     {!!subtitle && (
@@ -194,17 +197,21 @@ const styles = StyleSheet.create({
   header: { marginBottom: Spacing.three },
   empty: { textAlign: 'center', marginTop: Spacing.five },
   // 8px card radius + 1px brass hairline per the Estate & Ember system.
+  // Padding stepped down from four to three so the 60px thumb doesn't
+  // balloon the row — density stays at the mock's compact tray height.
   card: {
     borderRadius: 8,
     borderWidth: 1,
-    padding: Spacing.four,
+    padding: Spacing.three,
     marginBottom: Spacing.three,
   },
+  // Centered so the 60px thumb and the text block share a midline; the
+  // card stays compact — the thumb, not padding, sets the row height.
   cardRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: Spacing.two,
+    alignItems: 'center',
+    gap: Spacing.three,
   },
   cardMain: { flex: 1, gap: Spacing.one },
   cardName: { ...Type.title },

@@ -12,6 +12,8 @@ module.exports = {
     'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|@powersync/.*))',
   ],
   moduleNameMapper: {
+    // CSS is for the web bundle; component tests just need it to no-op.
+    '\\.css$': '<rootDir>/jest/css-mock.js',
     '^@/(.*)$': '<rootDir>/src/$1',
     // @powersync/node is ESM-only ("import" condition); point Jest's CJS
     // resolver at the file and let babel transpile it.

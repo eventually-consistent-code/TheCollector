@@ -19,10 +19,17 @@ import type { CollectionRecord, ItemRecord } from './schema';
 // Re-export so screens have one import surface for the live db.
 export { usePowerSync };
 
-// A search hit is an item plus its collection's label bits.
+// A search hit is an item plus its collection's label bits and the first
+// photo's local uri (NULL when the item has no renderable photo yet).
 export type SearchItemRow = ItemRecord & {
   collection_name: string;
   collection_vertical: string;
+  thumb_uri: string | null;
+};
+
+// A collection-list row — item columns plus the first-photo thumb uri.
+export type ItemListRow = ItemRecord & {
+  thumb_uri: string | null;
 };
 
 // Table-less no-op for the empty-search case: zero rows, and PowerSync finds
@@ -71,15 +78,15 @@ export function useItem(id: string | undefined) {
 }
 
 // Items within a collection with the filter bar's compiled state applied —
-// identical rows to useItems when no filter is passed. Kept separate so
-// useItems and its call sites stay untouched.
+// identical rows to useItems when no filter is passed (plus thumb_uri).
+// Kept separate so useItems and its call sites stay untouched.
 export function useFilteredItems(
   collectionId: string | undefined,
   sort: ItemSort = DEFAULT_SORT,
   filter?: ItemListFilter
 ) {
   const built = buildItemsQuery(collectionId ?? null, sort, filter);
-  return useQuery<ItemRecord>(built.sql, built.params);
+  return useQuery<ItemListRow>(built.sql, built.params);
 }
 
 // Distinct tags present in one collection's items, alphabetical — the filter

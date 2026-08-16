@@ -14,6 +14,17 @@ import { ThemedText } from '@/components/themed-text';
 import { getPhotoQueue } from '@/db/photos';
 import { useTheme } from '@/hooks/use-theme';
 
+// Which uri actually renders: native shows the file:// uri straight; web
+// can only show the minted blob URL (indexeddb:// isn't renderable), so
+// until that lands there is nothing to show. Pure — unit-tested headless.
+export function resolvePhotoUri(
+  platform: string,
+  localUri: string | null,
+  webUrl: string | null
+): string | null {
+  return platform === 'web' ? webUrl : localUri;
+}
+
 export function ItemPhoto({ localUri, size }: { localUri: string | null; size: number }) {
   const db = usePowerSync();
   const theme = useTheme();
@@ -51,7 +62,7 @@ export function ItemPhoto({ localUri, size }: { localUri: string | null; size: n
     };
   }, [db, localUri]);
 
-  const uri = Platform.OS === 'web' ? webUrl : localUri;
+  const uri = resolvePhotoUri(Platform.OS, localUri, webUrl);
 
   if (!uri) {
     return (
