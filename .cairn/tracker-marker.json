@@ -66,8 +66,8 @@
       "title": "REQ-09: Value tracking — purchase price, current value, totals, simple stats",
       "bodyHash": "c662858cd415e933",
       "labels": [],
-      "state": "open",
-      "updatedAt": "2026-08-09T05:39:07Z"
+      "state": "closed",
+      "updatedAt": "2026-08-17T05:53:27Z"
     },
     "10": {
       "title": "PowerSync RSocket \"Closed / Stream end encountered\" console errors repeating (44×) on iOS after app left running — determine if sync self-heals (token-expiry reconnect noise) or connection is stuck in a dead loop",
@@ -327,6 +327,55 @@
       "labels": [],
       "state": "open",
       "updatedAt": "2026-08-17T04:35:55Z"
+    },
+    "43": {
+      "title": "Book type-ahead lookup fails with raw TCP timeout in the popover — Open Library unreachable from Supabase edge egress (os error 110); Google Books fallback never engages on OL transport errors (only on empty results), and the raw upstream error string renders in the suggestion hint row",
+      "bodyHash": "e3b0c44298fc1c14",
+      "labels": [
+        "cairn:bug"
+      ],
+      "state": "closed",
+      "updatedAt": "2026-08-17T04:56:03Z"
+    },
+    "44": {
+      "title": "P7-T1: item_value_history synced table + source link persistence",
+      "bodyHash": "a6e595868b2e9235",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-17T05:31:37Z"
+    },
+    "45": {
+      "title": "P7-T2: Insights live — value-over-time line, allocation, stat tiles",
+      "bodyHash": "bc81176bea7c8c21",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-17T05:41:26Z"
+    },
+    "46": {
+      "title": "P7-T3: Per-collection value total on the collection header",
+      "bodyHash": "eb70759165e44b75",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-17T05:29:39Z"
+    },
+    "47": {
+      "title": "P7-T4: Book item view — author photo placeholder (+ cheap live fetch when available)",
+      "bodyHash": "1a2eb361e7c3453a",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-17T05:29:35Z"
+    },
+    "48": {
+      "title": "P7-T5: Offline image backfill — reconnect sweeper fetches images for photo-less items",
+      "bodyHash": "252dd1d6508571ac",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-17T06:05:19Z"
     }
   },
   "phases": {

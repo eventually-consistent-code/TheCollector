@@ -44,3 +44,11 @@ rebuild, done pre-UAT).
 - OLID → live author photos (thread author_key through BookHit).
 - Per-item "refresh value" action once ≥2 verticals have price sources.
 - #39 datalake + #42 photo appraisal: phase 8 candidates.
+
+## Addendum (2026-08-17, post-initial-verify)
+
+#48 offline image backfill added and closed in-phase: pending_image_url
+persistence + reconnect sweeper (pending url → CardSight sentinel →
+guarded name-match), cloud column applied and verified, suite 430/430,
+tsc clean. Device UAT of the reconnect path rides the next session's
+smoke (mechanism fully unit/db-tested; sweep is silent + capped).
