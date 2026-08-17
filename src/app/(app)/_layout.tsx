@@ -7,11 +7,16 @@
 import { Stack } from 'expo-router';
 
 import { FontFamily } from '@/constants/theme';
+import { useImageBackfill } from '@/db/image-backfill';
 
 // Anchor deep links and initial routes on the tab shell.
 export const unstable_settings = { anchor: '(tabs)' };
 
 export default function AppLayout() {
+  // Offline image backfill — this layout is alive whenever someone is
+  // signed in, so the sweeper sees every reconnect.
+  useImageBackfill();
+
   return (
     // Serif header titles — the Estate & Ember display voice.
     <Stack screenOptions={{ headerTitleStyle: { fontFamily: FontFamily.serifBold } }}>

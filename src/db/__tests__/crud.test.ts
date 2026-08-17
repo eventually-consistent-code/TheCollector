@@ -12,6 +12,7 @@ import * as path from 'path';
 import { PowerSyncDatabase } from '@powersync/node';
 
 import {
+  clearPendingImage,
   createCollection,
   createItem,
   deleteCollection,
@@ -416,6 +417,42 @@ describe('metadata source-link', () => {
     const row = await db.get<any>('SELECT source, source_id FROM items WHERE id = ?', [id]);
     expect(row.source).toBe('discogs');
     expect(row.source_id).toBe('r111');
+  });
+
+  test('pendingImageUrl lands on create and survives a plain update', async () => {
+    const id = await createItem(
+      db,
+      collectionId,
+      { name: 'Kind of Blue', pendingImageUrl: 'https://x/cover.jpg' },
+      U1
+    );
+
+    let row = await db.get<any>('SELECT pending_image_url FROM items WHERE id = ?', [id]);
+    expect(row.pending_image_url).toBe('https://x/cover.jpg');
+
+    // A hand edit with no pendingImageUrl must not strip the debt.
+    await updateItem(db, id, { name: 'Kind of Blue (mono)' });
+    row = await db.get<any>('SELECT pending_image_url FROM items WHERE id = ?', [id]);
+    expect(row.pending_image_url).toBe('https://x/cover.jpg');
+  });
+
+  test('clearPendingImage nulls the marker and nothing else', async () => {
+    const id = await createItem(
+      db,
+      collectionId,
+      { name: 'Giant Steps', pendingImageUrl: 'https://x/cover.jpg', source: 'discogs' },
+      U1
+    );
+
+    await clearPendingImage(db, id);
+
+    const row = await db.get<any>(
+      'SELECT name, source, pending_image_url FROM items WHERE id = ?',
+      [id]
+    );
+    expect(row.pending_image_url).toBeNull();
+    expect(row.name).toBe('Giant Steps');
+    expect(row.source).toBe('discogs');
   });
 });
 

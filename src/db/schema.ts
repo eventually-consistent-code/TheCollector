@@ -43,6 +43,9 @@ const items = new Table(
     // and the source's own id for the hit; null for hand-entered items.
     source: column.text,
     source_id: column.text,
+    // Offline image backfill (phase 7) — the cover-art url we still owe this
+    // item; the reconnect sweeper retries it, cleared once a photo lands.
+    pending_image_url: column.text,
     created_at: column.text,
     updated_at: column.text,
   },

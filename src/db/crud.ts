@@ -78,6 +78,10 @@ export interface ItemFieldsInput {
   // Where the value figure came from — history rows record it; absent
   // means the collector typed it themselves ('manual').
   valueSource?: string;
+  // Cover-art url we still owe this item (offline backfill, phase 7) —
+  // set alongside the immediate fetch attempt, cleared once a photo lands.
+  // Same preserve-when-undefined semantics as source/sourceId on update.
+  pendingImageUrl?: string;
 }
 
 // Appends a value-history row — the item's value trail, one row per change.
@@ -116,8 +120,8 @@ export async function createItem(
       `INSERT INTO items
          (id, user_id, collection_id, name, notes, acquired_at,
           purchase_price_cents, current_value_cents, custom_fields, tags,
-          source, source_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          source, source_id, pending_image_url, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         userId,
@@ -131,6 +135,7 @@ export async function createItem(
         tagsToJson(input.tags),
         input.source ?? null,
         input.sourceId ?? null,
+        input.pendingImageUrl ?? null,
         ts,
         ts,
       ]
@@ -156,7 +161,12 @@ export async function updateItem(
     current_value_cents: number | null;
     source: string | null;
     source_id: string | null;
-  }>(`SELECT user_id, current_value_cents, source, source_id FROM items WHERE id = ?`, [id]);
+    pending_image_url: string | null;
+  }>(
+    `SELECT user_id, current_value_cents, source, source_id, pending_image_url
+       FROM items WHERE id = ?`,
+    [id]
+  );
   if (!existing) {
     return;
   }
@@ -170,7 +180,7 @@ export async function updateItem(
       `UPDATE items SET
          name = ?, notes = ?, acquired_at = ?,
          purchase_price_cents = ?, current_value_cents = ?, custom_fields = ?,
-         tags = ?, source = ?, source_id = ?, updated_at = ?
+         tags = ?, source = ?, source_id = ?, pending_image_url = ?, updated_at = ?
        WHERE id = ?`,
       [
         input.name,
@@ -184,6 +194,9 @@ export async function updateItem(
         // edits pass undefined and the original attribution stands.
         input.source !== undefined ? input.source : existing.source,
         input.sourceId !== undefined ? input.sourceId : existing.source_id,
+        input.pendingImageUrl !== undefined
+          ? input.pendingImageUrl
+          : existing.pending_image_url,
         now(),
         id,
       ]
@@ -222,6 +235,16 @@ export async function listValueHistory(
       ORDER BY recorded_at ASC, id ASC`,
     [itemId]
   );
+}
+
+// Drops the pending-image marker — called once a photo actually lands, so
+// the backfill sweeper stops owing this item cover art. One UPDATE, no
+// updated_at bump: housekeeping, not a user edit.
+export async function clearPendingImage(
+  db: AbstractPowerSyncDatabase,
+  itemId: string
+): Promise<void> {
+  await db.execute(`UPDATE items SET pending_image_url = NULL WHERE id = ?`, [itemId]);
 }
 
 export async function deleteItem(
