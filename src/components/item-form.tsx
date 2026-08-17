@@ -148,7 +148,6 @@ export function ItemForm({
         <Field label="Name" value={name} onChangeText={changeName} autoFocus={!initial} />
         <NameLookupPopover state={suggest.state} onPick={pickSuggestion} />
       </View>
-      <Field label="Notes" value={notes} onChangeText={setNotes} multiline />
       <Field
         label="Acquired (YYYY-MM-DD)"
         value={acquiredAt}
@@ -180,6 +179,12 @@ export function ItemForm({
           <TemplateFields fields={template.fields} values={custom} onChange={setCustom} />
         </>
       )}
+      {/* Notes close the ledger — provenance and remarks read best after the
+          facts, per the detail-dossier mocks' Curator's Note placement. */}
+      <ThemedText type="subtitle" style={{ marginTop: 8, marginBottom: 12 }}>
+        Notes
+      </ThemedText>
+      <Field label="Notes" value={notes} onChangeText={setNotes} multiline />
       {footer}
       <ActionButton title={saveLabel} onPress={save} disabled={!name.trim()} />
     </ScrollView>
