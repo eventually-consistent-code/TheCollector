@@ -184,7 +184,7 @@ export function ItemForm({
       <ThemedText type="subtitle" style={{ marginTop: 8, marginBottom: 12 }}>
         Notes
       </ThemedText>
-      <Field label="Notes" value={notes} onChangeText={setNotes} multiline />
+      <Field value={notes} onChangeText={setNotes} multiline />
       {footer}
       <ActionButton title={saveLabel} onPress={save} disabled={!name.trim()} />
     </ScrollView>

@@ -66,10 +66,10 @@ export function StationeryInput({
 export function Field({
   label,
   ...inputProps
-}: { label: string } & TextInputProps) {
+}: { label?: string } & TextInputProps) {
   return (
     <View style={styles.field}>
-      <FieldLabel>{label}</FieldLabel>
+      {label ? <FieldLabel>{label}</FieldLabel> : null}
       <StationeryInput {...inputProps} />
     </View>
   );
