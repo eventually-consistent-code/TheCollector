@@ -306,3 +306,16 @@ export const VERTICAL_BREAKDOWN_SQL =
 export const RECENT_ITEMS_SQL =
   `SELECT items.*, ${FIRST_PHOTO_URI_SQL} AS thumb_uri ` +
   `FROM items ORDER BY created_at DESC LIMIT ?`;
+
+//*************************************************************************
+// Collection header rollup
+//*************************************************************************
+
+// One collection's worth at a glance — current value, cost basis, and item
+// count in a single row. COALESCE keeps both sums at 0 (not NULL) when no
+// item carries a figure yet. One param: collection id.
+export const COLLECTION_VALUE_TOTALS_SQL =
+  `SELECT COALESCE(SUM(current_value_cents), 0) AS value_cents, ` +
+  `COALESCE(SUM(purchase_price_cents), 0) AS cost_cents, ` +
+  `COUNT(*) AS n ` +
+  `FROM items WHERE collection_id = ?`;

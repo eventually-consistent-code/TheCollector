@@ -15,6 +15,7 @@ import {
   DASHBOARD_TOTALS_SQL,
   VERTICAL_BREAKDOWN_SQL,
   RECENT_ITEMS_SQL,
+  COLLECTION_VALUE_TOTALS_SQL,
 } from './query';
 import type { ItemListFilter, ItemSort } from './query';
 import type { CollectionRecord, ItemRecord } from './schema';
@@ -125,4 +126,18 @@ export function useVerticalBreakdown() {
 // "Recently Cataloged" rail. Rows reuse ItemListRow (item + thumb_uri).
 export function useRecentItems(limit = 5) {
   return useQuery<ItemListRow>(RECENT_ITEMS_SQL, [limit]);
+}
+
+// One collection's rollup — current value, cost basis, item count.
+export type CollectionValueTotals = {
+  value_cents: number;
+  cost_cents: number;
+  n: number;
+};
+
+// Live worth of one collection for its header plaque.
+export function useCollectionValueTotals(collectionId: string | undefined) {
+  return useQuery<CollectionValueTotals>(COLLECTION_VALUE_TOTALS_SQL, [
+    collectionId ?? null,
+  ]);
 }
