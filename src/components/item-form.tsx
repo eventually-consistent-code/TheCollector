@@ -34,6 +34,7 @@ export function ItemForm({
   lookup,
   saveLabel,
   onSave,
+  header,
   footer,
 }: {
   template: Template;
@@ -48,6 +49,9 @@ export function ItemForm({
   };
   saveLabel: string;
   onSave: (input: ItemFieldsInput) => void | Promise<void>;
+  // Extra content rendered above the name field (e.g. the photo hero) —
+  // scrolls with the form, mirror of footer.
+  header?: ReactNode;
   // Extra content rendered above the save button (e.g. the photo section).
   footer?: ReactNode;
 }) {
@@ -139,6 +143,7 @@ export function ItemForm({
           accessible={false}
         />
       )}
+      {header}
       <View style={styles.nameAnchor}>
         <Field label="Name" value={name} onChangeText={changeName} autoFocus={!initial} />
         <NameLookupPopover state={suggest.state} onPick={pickSuggestion} />

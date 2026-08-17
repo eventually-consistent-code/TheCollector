@@ -25,10 +25,28 @@ export function resolvePhotoUri(
   return platform === 'web' ? webUrl : localUri;
 }
 
-export function ItemPhoto({ localUri, size }: { localUri: string | null; size: number }) {
+export function ItemPhoto({
+  localUri,
+  size,
+  // Hero mode: fill the parent instead of a fixed square, letterboxed with
+  // contain so tall cards and wide boxes both show whole. Tile callers keep
+  // the original square-cover behavior untouched.
+  fill = false,
+  contentFit = 'cover',
+}: {
+  localUri: string | null;
+  size?: number;
+  fill?: boolean;
+  contentFit?: 'cover' | 'contain';
+}) {
   const db = usePowerSync();
   const theme = useTheme();
   const [webUrl, setWebUrl] = useState<string | null>(null);
+
+  // Fixed square for tiles; stretch to the parent's box for the hero.
+  const frame = fill
+    ? ({ width: '100%', height: '100%' } as const)
+    : { width: size ?? 0, height: size ?? 0 };
 
   // Web: indexeddb:// URIs aren't renderable — read bytes, mint a blob URL.
   useEffect(() => {
@@ -67,10 +85,7 @@ export function ItemPhoto({ localUri, size }: { localUri: string | null; size: n
   if (!uri) {
     return (
       <View
-        style={[
-          styles.placeholder,
-          { width: size, height: size, backgroundColor: theme.backgroundElement },
-        ]}
+        style={[styles.placeholder, frame, { backgroundColor: theme.backgroundElement }]}
       >
         <ThemedText type="small" themeColor="textSecondary">
           …
@@ -82,8 +97,8 @@ export function ItemPhoto({ localUri, size }: { localUri: string | null; size: n
   return (
     <Image
       source={{ uri }}
-      style={{ width: size, height: size, borderRadius: 10 }}
-      contentFit="cover"
+      style={[frame, !fill && { borderRadius: 10 }]}
+      contentFit={contentFit}
       recyclingKey={localUri ?? undefined}
     />
   );
