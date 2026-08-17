@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
+import { AuthorBadge } from '@/components/author-badge';
 import { ChipPicker, Field } from '@/components/form';
 import { ThemedText } from '@/components/themed-text';
 // Money values render in Geist with the amber tint — the ledger's ink.
@@ -145,19 +146,48 @@ export function TemplateFields({
 
   return (
     <View>
-      {fields.map((def) => (
-        <TemplateField
-          key={def.key}
-          def={def}
-          value={values[def.key]}
-          onChange={(v) => setValue(def.key, v)}
-        />
-      ))}
+      {fields.map((def) =>
+        def.key === 'author' ? (
+          // Author presence — only the books template carries an 'author'
+          // key, so keying off the field name spares threading a template
+          // id down here. Monogram medallion left of the untouched input.
+          <View key={def.key} style={styles.authorRow} testID="author-field-row">
+            <View style={styles.authorBadgeSeat}>
+              <AuthorBadge
+                name={typeof values[def.key] === 'string' ? (values[def.key] as string) : undefined}
+              />
+            </View>
+            <View style={styles.authorField}>
+              <TemplateField
+                def={def}
+                value={values[def.key]}
+                onChange={(v) => setValue(def.key, v)}
+              />
+            </View>
+          </View>
+        ) : (
+          <TemplateField
+            key={def.key}
+            def={def}
+            value={values[def.key]}
+            onChange={(v) => setValue(def.key, v)}
+          />
+        )
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // Badge sits bottom-aligned with the input; the seat's margin mirrors the
+  // Field's own 16px bottom margin so both land on the same baseline.
+  authorRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 12,
+  },
+  authorBadgeSeat: { marginBottom: 16 },
+  authorField: { flex: 1 },
   switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
