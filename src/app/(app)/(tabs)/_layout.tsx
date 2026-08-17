@@ -1,5 +1,5 @@
 /**
- * Purpose: Bottom tab shell — Dashboard / The Vault / Scan / Insights /
+ * Purpose: Bottom tab shell — Dashboard / Collections / Scan / Insights /
  * Profile. Scan is a dummy route: pressing it never navigates, it raises
  * the collection picker instead. The bar is deep slate with a brass
  * hairline — the shelf edge under the whole app.
@@ -68,7 +68,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="vault"
           options={{
-            title: 'The Vault',
+            title: 'Collections',
             tabBarIcon: ({ color }) => <VaultIcon color={color} size={22} />,
           }}
         />
