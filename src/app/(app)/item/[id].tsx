@@ -1,5 +1,6 @@
 /**
- * Purpose: Item detail — edit via shared form, two-tap delete.
+ * Purpose: Item detail — photo hero up top, edit via shared form below,
+ * two-tap delete.
  * Author(s): John Reed
  */
 
@@ -11,7 +12,7 @@ import { View } from 'react-native';
 import { useSession } from '@/auth/session';
 import { ActionButton } from '@/components/form';
 import { ItemForm } from '@/components/item-form';
-import { PhotoSection } from '@/components/photo-section';
+import { ItemHero } from '@/components/item-hero';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { deleteItem, updateItem } from '@/db/crud';
@@ -54,8 +55,10 @@ export default function ItemScreen() {
           await updateItem(db, item.id, input);
           router.back();
         }}
-        footer={
-          session ? <PhotoSection itemId={item.id} userId={session.user.id} /> : null
+        // Detail dossier: the photo leads, the ledger follows — hero above
+        // the name field, scrolling with the form.
+        header={
+          session ? <ItemHero itemId={item.id} userId={session.user.id} /> : null
         }
       />
       <View style={{ padding: Spacing.three }}>

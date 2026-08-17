@@ -1,11 +1,10 @@
 /**
  * Purpose: Photo section for the item screen — grid of attachments, add
  * buttons (camera native-only, library everywhere), tap-to-arm delete.
+ * The query/add/delete core lives in useItemPhotos, shared with ItemHero.
  * Author(s): John Reed
  */
 
-import { useQuery, usePowerSync } from '@powersync/react';
-import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { ActionButton } from '@/components/form';
@@ -13,64 +12,15 @@ import { ItemPhoto } from '@/components/item-photo';
 import { ThemedText } from '@/components/themed-text';
 // Brass hairline frames around the thumbnails — framed plates in the study.
 import { Palette } from '@/constants/theme';
-import { deletePhoto, savePhoto } from '@/db/photos';
-import { pickPhotos, takePhoto } from '@/lib/capture';
+import { useItemPhotos } from '@/hooks/use-item-photos';
 
 // Constants
 
 const TILE = 96;
 
-interface PhotoRow {
-  id: string;
-  local_uri: string | null;
-  state: number | null;
-}
-
 export function PhotoSection({ itemId, userId }: { itemId: string; userId: string }) {
-  const db = usePowerSync();
-  const [busy, setBusy] = useState(false);
-  const [armedDelete, setArmedDelete] = useState<string | null>(null);
-
-  // Photos for this item joined to their local attachment state.
-  const { data: photos } = useQuery<PhotoRow>(
-    `SELECT p.id, a.local_uri, a.state
-     FROM photos p LEFT JOIN attachments a ON a.id = p.id
-     WHERE p.item_id = ? ORDER BY p.created_at DESC`,
-    [itemId]
-  );
-
-  const addFromLibrary = async () => {
-    setBusy(true);
-    try {
-      const buffers = await pickPhotos();
-      for (const buf of buffers) {
-        await savePhoto(db, itemId, userId, buf);
-      }
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const addFromCamera = async () => {
-    setBusy(true);
-    try {
-      const buf = await takePhoto();
-      if (buf) {
-        await savePhoto(db, itemId, userId, buf);
-      }
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const onPhotoPress = async (id: string) => {
-    if (armedDelete === id) {
-      setArmedDelete(null);
-      await deletePhoto(db, id);
-    } else {
-      setArmedDelete(id);
-    }
-  };
+  const { photos, busy, armedDelete, addFromLibrary, addFromCamera, onPhotoPress } =
+    useItemPhotos(itemId, userId);
 
   return (
     <View style={styles.section}>
