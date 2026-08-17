@@ -11,4 +11,4 @@
 | 6 | Search, filter, sort | verified |
 | 6.5 | Estate & Ember UI — implement Stitch visual system | verified |
 | 6.7 | App Shell — tabs, Dashboard, Profile, collection cover art | verified |
-| 7 | Value tracking + stats | pending |
+| 7 | Value tracking + stats | verified |
