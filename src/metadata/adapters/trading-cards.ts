@@ -150,14 +150,12 @@ export function segmentToGame(segment: string): string {
 // listings) and the common price keys, dollars in numbers or strings.
 // Median of what's found, in cents; null when nothing parses.
 export function estimateValueCents(payload: unknown): number | null {
+  const obj = payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : null;
+  // Live shape (verified 2026-08-16): { raw: { records: [{ price, date, … }] } }.
+  const raw = obj?.raw && typeof obj.raw === 'object' ? (obj.raw as Record<string, unknown>) : null;
   const container = Array.isArray(payload)
     ? payload
-    : payload && typeof payload === 'object'
-      ? ((payload as Record<string, unknown>).sales ??
-        (payload as Record<string, unknown>).results ??
-        (payload as Record<string, unknown>).listings ??
-        (payload as Record<string, unknown>).data)
-      : null;
+    : (raw?.records ?? obj?.records ?? obj?.sales ?? obj?.results ?? obj?.listings ?? obj?.data);
   if (!Array.isArray(container)) return null;
 
   const prices = container

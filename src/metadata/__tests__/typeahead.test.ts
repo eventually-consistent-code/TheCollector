@@ -303,3 +303,11 @@ describe('estimateValueCents', () => {
     expect(estimateValueCents(null)).toBeNull();
   });
 });
+
+describe('estimateValueCents live shape', () => {
+  it('reads raw.records (verified CardSight pricing payload)', () => {
+    expect(
+      estimateValueCents({ raw: { records: [{ price: 157.5 }, { price: 160 }, { price: 150 }] } })
+    ).toBe(15750);
+  });
+});
