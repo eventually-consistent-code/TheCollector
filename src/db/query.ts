@@ -319,3 +319,35 @@ export const COLLECTION_VALUE_TOTALS_SQL =
   `COALESCE(SUM(purchase_price_cents), 0) AS cost_cents, ` +
   `COUNT(*) AS n ` +
   `FROM items WHERE collection_id = ?`;
+
+//*************************************************************************
+// Insights — portfolio series + movers
+//*************************************************************************
+
+// Every value-history row in the archive, oldest first — raw fuel for
+// buildPortfolioSeries (src/lib/value-series.ts). Sync streams already
+// scope rows to the signed-in user, so no user_id param rides here.
+export const ALL_VALUE_HISTORY_SQL =
+  `SELECT item_id, value_cents, recorded_at ` +
+  `FROM item_value_history ` +
+  `ORDER BY recorded_at ASC`;
+
+// Each item's baseline for the portfolio line — what it cost, what it's
+// worth, and the two timestamps that can anchor its start on the x-axis.
+export const ITEMS_VALUE_BASELINE_SQL =
+  `SELECT id, purchase_price_cents, current_value_cents, ` +
+  `acquired_at, created_at ` +
+  `FROM items`;
+
+// Top three appreciators — current value minus purchase price, both
+// figures required so the delta is honest, biggest gain first, each with
+// its first-photo thumb riding along.
+export const TOP_MOVERS_SQL =
+  `SELECT items.id, items.name, items.purchase_price_cents, ` +
+  `items.current_value_cents, ` +
+  `(items.current_value_cents - items.purchase_price_cents) AS delta_cents, ` +
+  `${FIRST_PHOTO_URI_SQL} AS thumb_uri ` +
+  `FROM items ` +
+  `WHERE items.current_value_cents IS NOT NULL ` +
+  `AND items.purchase_price_cents IS NOT NULL ` +
+  `ORDER BY delta_cents DESC LIMIT 3`;
