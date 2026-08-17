@@ -25,6 +25,9 @@ export interface MetadataResult {
   source: string;
   // The source's own id for this hit — fuels enrich-on-pick detail lookups.
   sourceId?: string;
+  // Estimated market value in cents (recent completed sales) — item-level,
+  // not a template field; the form offers it into Current Value when empty.
+  valueCents?: number;
 }
 
 // One adapter per vertical, registered by template id. Barcode lookup is

@@ -62,10 +62,31 @@ export async function fetchImageBytes(
   }
 }
 
+// Pure base64 → bytes. React Native's Hermes has atob in recent versions
+// but its Blob never grew arrayBuffer() — so the edge fn ships base64 JSON
+// and this decoder needs no platform APIs at all.
+const B64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+export function decodeBase64(input: string): ArrayBuffer {
+  const clean = input.replace(/[^A-Za-z0-9+/]/g, '');
+  const out: number[] = [];
+  for (let i = 0; i + 1 < clean.length; i += 4) {
+    const n =
+      (B64_ALPHABET.indexOf(clean[i]) << 18) |
+      (B64_ALPHABET.indexOf(clean[i + 1]) << 12) |
+      ((B64_ALPHABET.indexOf(clean[i + 2]) & 63) << 6) |
+      (B64_ALPHABET.indexOf(clean[i + 3]) & 63);
+    out.push((n >> 16) & 255);
+    if (clean[i + 2] !== undefined) out.push((n >> 8) & 255);
+    if (clean[i + 3] !== undefined) out.push(n & 255);
+  }
+  return new Uint8Array(out).buffer;
+}
+
 // CardSight art has no public URL — the sentinel carries the card id, and
-// the bytes come back through the metadata function's 'image' op (the app's
-// authorized channel to the keyed endpoint). supabase-js hands binary
-// content-types back as a Blob; anything else is treated as a miss.
+// the bytes come back through the metadata function's 'image' op as
+// { contentType, base64 } JSON (RN's Blob can't yield bytes, so binary
+// transport is off the table). Blob/ArrayBuffer branches remain as
+// fallbacks for any environment that still hands binary through.
 export async function fetchSentinelImageBytes(
   imageUrl: string,
   invokeFn: MetadataInvokeFn = defaultInvoke
@@ -80,7 +101,11 @@ export async function fetchSentinelImageBytes(
     return null;
   }
 
-  if (typeof Blob !== 'undefined' && data instanceof Blob) {
+  if (typeof data === 'object' && typeof (data as { base64?: unknown }).base64 === 'string') {
+    const bytes = decodeBase64((data as { base64: string }).base64);
+    return bytes.byteLength > 0 ? bytes : null;
+  }
+  if (typeof Blob !== 'undefined' && data instanceof Blob && typeof data.arrayBuffer === 'function') {
     const bytes = await data.arrayBuffer();
     return bytes.byteLength > 0 ? bytes : null;
   }

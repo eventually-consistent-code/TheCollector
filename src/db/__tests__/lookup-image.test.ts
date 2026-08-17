@@ -263,3 +263,31 @@ describe('cardsight image sentinel', () => {
     warn.mockRestore();
   });
 });
+
+// Base64 transport (RN-safe path)
+
+import { decodeBase64 } from '../lookup-image';
+
+describe('decodeBase64', () => {
+  it('decodes to the exact bytes', () => {
+    const bytes = new Uint8Array(decodeBase64('SGVsbG8='));
+    expect(Array.from(bytes)).toEqual([72, 101, 108, 108, 111]);
+  });
+
+  it('handles unpadded and whitespace-laced input', () => {
+    const bytes = new Uint8Array(decodeBase64('SGVs\nbG8'));
+    expect(Array.from(bytes)).toEqual([72, 101, 108, 108, 111]);
+  });
+});
+
+describe('fetchSentinelImageBytes base64 payload', () => {
+  it('resolves {base64} JSON into bytes', async () => {
+    const invoke = jest.fn(async () => ({
+      data: { contentType: 'image/jpeg', base64: 'SGVsbG8=' },
+      error: null,
+    }));
+    const bytes = await fetchSentinelImageBytes('cardsight-image:abc', invoke);
+    expect(bytes).not.toBeNull();
+    expect(new Uint8Array(bytes!).length).toBe(5);
+  });
+});

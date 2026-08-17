@@ -145,6 +145,38 @@ export function segmentToGame(segment: string): string {
 }
 
 // Pulls a string (or stringable number) out of an untyped detail payload.
+// Defensive sales-comp parse — CardSight pricing payload shape is not
+// pinned, so accept the common containers (flat array, sales/results/
+// listings) and the common price keys, dollars in numbers or strings.
+// Median of what's found, in cents; null when nothing parses.
+export function estimateValueCents(payload: unknown): number | null {
+  const container = Array.isArray(payload)
+    ? payload
+    : payload && typeof payload === 'object'
+      ? ((payload as Record<string, unknown>).sales ??
+        (payload as Record<string, unknown>).results ??
+        (payload as Record<string, unknown>).listings ??
+        (payload as Record<string, unknown>).data)
+      : null;
+  if (!Array.isArray(container)) return null;
+
+  const prices = container
+    .map((row) => {
+      if (!row || typeof row !== 'object') return null;
+      const r = row as Record<string, unknown>;
+      const raw = r.price ?? r.soldPrice ?? r.salePrice ?? r.sold_price ?? r.amount;
+      const num = typeof raw === 'string' ? Number(raw) : raw;
+      return typeof num === 'number' && Number.isFinite(num) && num > 0 ? num : null;
+    })
+    .filter((n): n is number => n != null)
+    .sort((a, b) => a - b);
+  if (!prices.length) return null;
+
+  const mid = Math.floor(prices.length / 2);
+  const median = prices.length % 2 ? prices[mid] : (prices[mid - 1] + prices[mid]) / 2;
+  return Math.round(median * 100);
+}
+
 function detailString(card: Record<string, unknown>, keys: string[]): string | undefined {
   for (const key of keys) {
     const value = card[key];
@@ -228,7 +260,21 @@ export const tradingCardsAdapter: MetadataAdapter = {
       const variant = detailString(card, ['parallelName', 'variant']);
       if (variant) fields.variant = variant;
 
-      return { ...result, fields };
+      // Sales comps ride a second op — its failure never spoils the detail
+      // merge (nested try, not the outer one).
+      let valueCents: number | undefined;
+      try {
+        const pricing = await callMetadata<unknown>({
+          source: 'cardsight',
+          op: 'pricing',
+          params: { id: result.sourceId },
+        });
+        valueCents = estimateValueCents(pricing) ?? undefined;
+      } catch {
+        // No comps, no estimate — the field stays blank for the collector.
+      }
+
+      return { ...result, fields, valueCents };
     } catch {
       // Enrichment is a bonus, never a blocker.
       return result;

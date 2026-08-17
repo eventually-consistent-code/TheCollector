@@ -139,15 +139,26 @@ async function cardsight(op: string, params: Record<string, string>): Promise<Re
     const id = encodeURIComponent(params.id ?? '');
     const response = await fetch(`https://api.cardsight.ai/v1/images/cards/${id}`, { headers });
     if (!response.ok) return fail(`cardsight image ${response.status}`, response.status);
-    // Pass the bytes straight through — the client saves them as the item's
-    // first photo, so JSON-wrapping would just be base64 bloat.
-    const bytes = await response.arrayBuffer();
-    return new Response(bytes, {
-      headers: {
-        ...CORS_HEADERS,
-        'Content-Type': response.headers.get('content-type') ?? 'image/jpeg',
-      },
+    // Base64-in-JSON on purpose: supabase-js hands binary responses to the
+    // client as a Blob, and React Native's Blob has no arrayBuffer() — raw
+    // bytes were unreadable on device. JSON survives every platform.
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    let binary = '';
+    const CHUNK = 0x8000;
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+    }
+    return json({
+      contentType: response.headers.get('content-type') ?? 'image/jpeg',
+      base64: btoa(binary),
     });
+  }
+
+  if (op === 'pricing') {
+    const id = encodeURIComponent(params.id ?? '');
+    const response = await fetch(`https://api.cardsight.ai/v1/pricing/${id}`, { headers });
+    if (!response.ok) return fail(`cardsight pricing ${response.status}`, response.status);
+    return json(await response.json());
   }
 
   const url = new URL('https://api.cardsight.ai/v1/catalog/search');

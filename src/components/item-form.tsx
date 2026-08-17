@@ -25,7 +25,6 @@ import type { FieldValues, Template } from '@/templates';
 
 // Enrichment is a nicety layered over a pick that already filled the form —
 // if the detail lookup dawdles past this, the base fill stands alone.
-const ENRICH_TIMEOUT_MS = 3_000;
 
 // Pre-fills from an existing row when editing.
 export function ItemForm({
@@ -95,13 +94,19 @@ export function ItemForm({
 
     const adapter = lookup?.adapter;
     if (!adapter?.enrich) return;
-    void Promise.race([
-      adapter.enrich(result),
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), ENRICH_TIMEOUT_MS)),
-    ])
+    // No timeout race — a cold edge function can take >3s and the extra
+    // fields are worth waiting for; the base fill already landed so the
+    // form is never blocked, and a late merge is still a welcome merge.
+    void adapter
+      .enrich(result)
       .then((enriched) => {
         if (!enriched || enriched === result) return;
         setCustom((prev) => ({ ...prev, ...fillFromResult(enriched).customFields }));
+        // Sales-comp estimate lands in the item-level value field, but only
+        // when the collector hasn't already typed one.
+        if (enriched.valueCents != null) {
+          setValue((prev) => prev || centsToDisplay(enriched.valueCents!).slice(1));
+        }
       })
       .catch(() => {
         // Adapters promise to swallow their own trouble — belt and braces.

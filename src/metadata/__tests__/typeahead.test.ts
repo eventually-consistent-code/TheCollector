@@ -282,3 +282,24 @@ describe('isRenderableImageUrl', () => {
     expect(isRenderableImageUrl(url as string | undefined)).toBe(expected);
   });
 });
+
+// Sales-comp estimate parsing (defensive across payload shapes)
+
+import { estimateValueCents } from '../adapters/trading-cards';
+
+describe('estimateValueCents', () => {
+  it('takes the median of a flat array in cents', () => {
+    expect(estimateValueCents([{ price: 10 }, { price: 30 }, { price: 20 }])).toBe(2000);
+  });
+
+  it('reads sales/results containers and string prices', () => {
+    expect(estimateValueCents({ sales: [{ soldPrice: '12.50' }] })).toBe(1250);
+    expect(estimateValueCents({ results: [{ amount: 5 }, { amount: 7 }] })).toBe(600);
+  });
+
+  it('ignores junk rows and returns null when nothing parses', () => {
+    expect(estimateValueCents({ sales: [{ price: 'n/a' }, {}] })).toBeNull();
+    expect(estimateValueCents({})).toBeNull();
+    expect(estimateValueCents(null)).toBeNull();
+  });
+});

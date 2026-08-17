@@ -30,7 +30,7 @@ export interface ProxyRequest {
   source: ProxySource;
   // 'image' is cardsight-only — the function answers with raw image bytes
   // instead of JSON (see saveLookupImage's sentinel path).
-  op: 'search' | 'lookup' | 'image';
+  op: 'search' | 'lookup' | 'image' | 'pricing';
   params: Record<string, string>;
 }
 
