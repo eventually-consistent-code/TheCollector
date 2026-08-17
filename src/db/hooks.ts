@@ -16,6 +16,9 @@ import {
   VERTICAL_BREAKDOWN_SQL,
   RECENT_ITEMS_SQL,
   COLLECTION_VALUE_TOTALS_SQL,
+  ALL_VALUE_HISTORY_SQL,
+  ITEMS_VALUE_BASELINE_SQL,
+  TOP_MOVERS_SQL,
 } from './query';
 import type { ItemListFilter, ItemSort } from './query';
 import type { CollectionRecord, ItemRecord } from './schema';
@@ -140,4 +143,46 @@ export function useCollectionValueTotals(collectionId: string | undefined) {
   return useQuery<CollectionValueTotals>(COLLECTION_VALUE_TOTALS_SQL, [
     collectionId ?? null,
   ]);
+}
+
+// One value-history row as the portfolio series consumes it.
+export type ValueHistorySeriesRow = {
+  item_id: string;
+  value_cents: number;
+  recorded_at: string;
+};
+
+// One item's baseline slice for the portfolio line.
+export type ItemValueBaselineRow = {
+  id: string;
+  purchase_price_cents: number | null;
+  current_value_cents: number | null;
+  acquired_at: string | null;
+  created_at: string | null;
+};
+
+// A top-mover row — the item, its two money figures, the delta between
+// them, and the first-photo thumb.
+export type TopMoverRow = {
+  id: string;
+  name: string;
+  purchase_price_cents: number;
+  current_value_cents: number;
+  delta_cents: number;
+  thumb_uri: string | null;
+};
+
+// Every value-history row, oldest first — fuel for buildPortfolioSeries.
+export function useAllValueHistory() {
+  return useQuery<ValueHistorySeriesRow>(ALL_VALUE_HISTORY_SQL);
+}
+
+// Each item's cost/value/date baseline for the portfolio line.
+export function useItemsValueBaseline() {
+  return useQuery<ItemValueBaselineRow>(ITEMS_VALUE_BASELINE_SQL);
+}
+
+// The three biggest gainers (current minus purchase, both known).
+export function useTopMovers() {
+  return useQuery<TopMoverRow>(TOP_MOVERS_SQL);
 }
