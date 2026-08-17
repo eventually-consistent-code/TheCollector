@@ -1120,3 +1120,5 @@
 {"ts":"2026-08-17T06:04:19.547Z","session_id":"e26176c9-f93f-4f6b-a8d3-b927a293c7d9","tool":"Bash","target":"git add src/app/\\(app\\)/_layout.tsx \"src/app/(app)/collection/[id]/new-item.tsx\"","error":false}
 {"ts":"2026-08-17T06:04:25.640Z","session_id":"e26176c9-f93f-4f6b-a8d3-b927a293c7d9","tool":"Bash","target":"npx tsc --noEmit && echo TSC-CLEAN","error":false}
 {"ts":"2026-08-17T06:05:08.987Z","session_id":"e26176c9-f93f-4f6b-a8d3-b927a293c7d9","tool":"Bash","target":"git merge --no-ff worktree-agent-aa723453bac6df65c -m \"Merge #48: offline image ","error":false}
+{"ts":"2026-08-17T06:05:29.523Z","session_id":"e26176c9-f93f-4f6b-a8d3-b927a293c7d9","tool":"Bash","target":"M48=$(git log --oneline -3 | grep \"Merge #48\" | cut -d' ' -f1) && python3 - <<EO","error":false}
+{"ts":"2026-08-17T06:05:44.669Z","session_id":"e26176c9-f93f-4f6b-a8d3-b927a293c7d9","tool":"Bash","target":"git log origin/main..HEAD --oneline | wc -l && git status --short | head -3","error":false}
