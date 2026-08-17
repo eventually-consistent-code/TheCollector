@@ -129,7 +129,7 @@ describe('saveLookupImage', () => {
         fetchFn: asFetch(fetchFn),
         save,
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toBe(false);
 
     expect(save).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalled();
@@ -152,10 +152,70 @@ describe('saveLookupImage', () => {
         fetchFn: asFetch(fetchFn),
         save,
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toBe(false);
 
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
+  });
+
+  test('success returns true and clears the pending-image marker', async () => {
+    const fetchFn = jest.fn(async () => fakeResponse({ contentType: 'image/jpeg' }));
+    const save = jest.fn(async () => 'photo-1');
+    const clearPending = jest.fn(async () => {});
+
+    await expect(
+      saveLookupImage({
+        db: DB,
+        itemId: 'item-1',
+        userId: 'user-1',
+        imageUrl: 'https://x/cover.jpg',
+        fetchFn: asFetch(fetchFn),
+        save,
+        clearPending,
+      })
+    ).resolves.toBe(true);
+
+    expect(clearPending).toHaveBeenCalledWith(DB, 'item-1');
+  });
+
+  test('failure never touches the pending-image marker', async () => {
+    const fetchFn = jest.fn(async () => fakeResponse({ ok: false }));
+    const save = jest.fn(async () => 'photo-1');
+    const clearPending = jest.fn(async () => {});
+
+    await expect(
+      saveLookupImage({
+        db: DB,
+        itemId: 'item-1',
+        userId: 'user-1',
+        imageUrl: 'https://x/cover.jpg',
+        fetchFn: asFetch(fetchFn),
+        save,
+        clearPending,
+      })
+    ).resolves.toBe(false);
+
+    expect(clearPending).not.toHaveBeenCalled();
+  });
+
+  test('a clearPending hiccup never demotes the success', async () => {
+    const fetchFn = jest.fn(async () => fakeResponse({ contentType: 'image/jpeg' }));
+    const save = jest.fn(async () => 'photo-1');
+    const clearPending = jest.fn(async () => {
+      throw new Error('db closed');
+    });
+
+    await expect(
+      saveLookupImage({
+        db: DB,
+        itemId: 'item-1',
+        userId: 'user-1',
+        imageUrl: 'https://x/cover.jpg',
+        fetchFn: asFetch(fetchFn),
+        save,
+        clearPending,
+      })
+    ).resolves.toBe(true);
   });
 
   test('no imageUrl is a no-op — fetch never fires', async () => {
@@ -256,7 +316,7 @@ describe('cardsight image sentinel', () => {
         save,
         invokeFn: asInvoke(invokeFn),
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toBe(false);
 
     expect(save).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalled();

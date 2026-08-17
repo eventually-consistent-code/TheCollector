@@ -28,6 +28,7 @@ create table if not exists public.items (
   tags text, -- JSON array of lowercase tag strings (phase 6)
   source text, -- metadata source-link (phase 7): which lookup filled this item
   source_id text, -- the source's own id for the hit
+  pending_image_url text, -- cover-art url still owed (offline backfill, phase 7)
   created_at text,
   updated_at text
 );
@@ -83,3 +84,8 @@ alter publication powersync add table public.item_value_history;
 -- The items columns need no replication/stream changes (whole-table
 -- publication + SELECT * streams). The NEW table does need its sync
 -- stream deployed — see powersync/sync-streams.yaml (dashboard deploy).
+--
+-- P7-T5: offline image backfill. MAIN SESSION MUST APPLY via psql:
+--   alter table public.items add column if not exists pending_image_url text;
+-- No replication/stream changes needed (whole-table publication +
+-- SELECT * streams pick the column up as-is).

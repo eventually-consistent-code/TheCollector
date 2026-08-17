@@ -63,15 +63,25 @@ export default function NewItemScreen() {
           if (!session) {
             return;
           }
-          const itemId = await createItem(db, id, input, session.user.id);
+          // A type-ahead pick beats the scan prefill; it is the fresher choice.
+          const imageUrl = pickedImageUrl.current ?? parsed?.imageUrl;
+          // The url ALSO rides into the row as pending_image_url — if the
+          // immediate fetch below dies (offline save, flaky network), the
+          // reconnect sweeper (image-backfill.ts) picks up the debt; a
+          // successful photo save clears it.
+          const itemId = await createItem(
+            db,
+            id,
+            imageUrl ? { ...input, pendingImageUrl: imageUrl } : input,
+            session.user.id
+          );
           // Lookup cover art rides along after the save — fire-and-forget,
-          // never blocks the form and never fails the item. A type-ahead
-          // pick beats the scan prefill; it is the fresher choice.
+          // never blocks the form and never fails the item.
           void saveLookupImage({
             db,
             itemId,
             userId: session.user.id,
-            imageUrl: pickedImageUrl.current ?? parsed?.imageUrl,
+            imageUrl,
           });
           router.back();
         }}

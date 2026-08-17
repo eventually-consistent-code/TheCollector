@@ -12,6 +12,7 @@ import type { AbstractPowerSyncDatabase } from '@powersync/common';
 import { supabase } from '@/auth/client';
 import { CARDSIGHT_IMAGE_PREFIX } from '@/metadata/types';
 
+import { clearPendingImage } from './crud';
 import { savePhoto } from './photos';
 
 // Constants
@@ -115,8 +116,8 @@ export async function fetchSentinelImageBytes(
   return null;
 }
 
-// Everything saveLookupImage needs — fetchFn/save/invokeFn are injectable
-// for tests.
+// Everything saveLookupImage needs — fetchFn/save/invokeFn/clearPending are
+// injectable for tests.
 export interface SaveLookupImageDeps {
   db: AbstractPowerSyncDatabase;
   itemId: string;
@@ -125,10 +126,13 @@ export interface SaveLookupImageDeps {
   fetchFn?: typeof fetch;
   save?: typeof savePhoto;
   invokeFn?: MetadataInvokeFn;
+  clearPending?: typeof clearPendingImage;
 }
 
 // Fire-and-forget entry point: no imageUrl is a no-op, and every failure
 // path (CORS, timeout, non-image body, save error) just warns and moves on.
+// Returns true only when a photo actually landed — the backfill sweeper
+// (image-backfill.ts) keys retry decisions off it; UI callers ignore it.
 export async function saveLookupImage({
   db,
   itemId,
@@ -137,9 +141,10 @@ export async function saveLookupImage({
   fetchFn = fetch,
   save = savePhoto,
   invokeFn = defaultInvoke,
-}: SaveLookupImageDeps): Promise<void> {
+  clearPending = clearPendingImage,
+}: SaveLookupImageDeps): Promise<boolean> {
   if (!imageUrl) {
-    return;
+    return false;
   }
 
   try {
@@ -149,10 +154,20 @@ export async function saveLookupImage({
       ? await fetchSentinelImageBytes(imageUrl, invokeFn)
       : await fetchImageBytes(imageUrl, fetchFn);
     if (!bytes) {
-      return;
+      return false;
     }
     await save(db, itemId, userId, bytes);
+
+    // Photo landed — the pending-image marker has done its job. Clearing is
+    // pure housekeeping, so trouble here never demotes the success.
+    try {
+      await clearPending(db, itemId);
+    } catch {
+      // local-only nicety; the next sweep clears it on the retry path
+    }
+    return true;
   } catch (error) {
     console.warn('lookup image skipped', String(error));
+    return false;
   }
 }
