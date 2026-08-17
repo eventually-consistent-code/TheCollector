@@ -7,7 +7,12 @@
 
 import type { AbstractPowerSyncDatabase } from '@powersync/common';
 
-import { fetchImageBytes, saveLookupImage } from '../lookup-image';
+import {
+  fetchImageBytes,
+  fetchSentinelImageBytes,
+  saveLookupImage,
+  type MetadataInvokeFn,
+} from '../lookup-image';
 
 jest.mock('expo-crypto', () => ({
   randomUUID: () => require('crypto').randomUUID(),
@@ -167,5 +172,94 @@ describe('saveLookupImage', () => {
 
     expect(fetchFn).not.toHaveBeenCalled();
     expect(save).not.toHaveBeenCalled();
+  });
+});
+
+// CardSight sentinel — bytes come through the edge function, never a
+// direct fetch (the endpoint is keyed; the key lives server-side only).
+
+describe('cardsight image sentinel', () => {
+  const asInvoke = (fn: jest.Mock) => fn as unknown as MetadataInvokeFn;
+
+  test('resolves sentinel bytes via the metadata function image op', async () => {
+    const bytes = new Uint8Array([1, 2, 3, 4]).buffer;
+    const invokeFn = jest.fn(async () => ({
+      data: new Blob([bytes], { type: 'image/jpeg' }),
+      error: null,
+    }));
+
+    const resolved = await fetchSentinelImageBytes('cardsight-image:uuid-1', asInvoke(invokeFn));
+
+    expect(invokeFn).toHaveBeenCalledWith({
+      source: 'cardsight',
+      op: 'image',
+      params: { id: 'uuid-1' },
+    });
+    expect(resolved?.byteLength).toBe(4);
+  });
+
+  test('returns null on invoke error, empty blob, or blank id', async () => {
+    const errored = jest.fn(async () => ({ data: null, error: new Error('502') }));
+    await expect(
+      fetchSentinelImageBytes('cardsight-image:uuid-1', asInvoke(errored))
+    ).resolves.toBeNull();
+
+    const empty = jest.fn(async () => ({ data: new Blob([]), error: null }));
+    await expect(
+      fetchSentinelImageBytes('cardsight-image:uuid-1', asInvoke(empty))
+    ).resolves.toBeNull();
+
+    const never = jest.fn();
+    await expect(
+      fetchSentinelImageBytes('cardsight-image:', asInvoke(never))
+    ).resolves.toBeNull();
+    expect(never).not.toHaveBeenCalled();
+  });
+
+  test('saveLookupImage routes the sentinel to invoke and saves the bytes', async () => {
+    const bytes = new Uint8Array([9, 9]).buffer;
+    const invokeFn = jest.fn(async () => ({
+      data: new Blob([bytes], { type: 'image/png' }),
+      error: null,
+    }));
+    const fetchFn = jest.fn();
+    const save = jest.fn(async () => 'photo-1');
+
+    await saveLookupImage({
+      db: DB,
+      itemId: 'item-1',
+      userId: 'user-1',
+      imageUrl: 'cardsight-image:uuid-9',
+      fetchFn: asFetch(fetchFn),
+      save,
+      invokeFn: asInvoke(invokeFn),
+    });
+
+    // Sentinel never touches direct fetch; bytes land in savePhoto.
+    expect(fetchFn).not.toHaveBeenCalled();
+    expect(save).toHaveBeenCalledWith(DB, 'item-1', 'user-1', expect.any(ArrayBuffer));
+  });
+
+  test('saveLookupImage swallows an invoke rejection without throwing', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const invokeFn = jest.fn(async () => {
+      throw new Error('relay down');
+    });
+    const save = jest.fn();
+
+    await expect(
+      saveLookupImage({
+        db: DB,
+        itemId: 'item-1',
+        userId: 'user-1',
+        imageUrl: 'cardsight-image:uuid-9',
+        save,
+        invokeFn: asInvoke(invokeFn),
+      })
+    ).resolves.toBeUndefined();
+
+    expect(save).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 });

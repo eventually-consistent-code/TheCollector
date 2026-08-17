@@ -10,7 +10,7 @@ import type { FieldValues } from '@/templates/types';
 
 import { directGet } from '../fetch';
 import { callMetadata } from '../proxy';
-import type { MetadataAdapter, MetadataResult } from '../types';
+import { CARDSIGHT_IMAGE_PREFIX, type MetadataAdapter, type MetadataResult } from '../types';
 
 // Constants
 
@@ -82,6 +82,7 @@ function mapPokemon(card: PokemonCard): MetadataResult {
 
 interface CardSightResult {
   type: string; // card | set | release | parallel
+  id?: string;
   name: string;
   year?: string;
   setName?: string;
@@ -99,6 +100,8 @@ function mapCardSight(card: CardSightResult): MetadataResult {
   const fields: FieldValues = {};
   const set = card.setName ?? card.releaseName;
   if (set) fields.set_name = set;
+  const year = Number(card.year);
+  if (card.year && Number.isFinite(year)) fields.year = year;
   // Parallel is CardSight's variant concept; "/25" rides along when numbered.
   if (card.parallelName) {
     fields.variant = card.numberedTo
@@ -109,9 +112,46 @@ function mapCardSight(card: CardSightResult): MetadataResult {
   return {
     title: card.name,
     subtitle: [card.year, set].filter(Boolean).join(' · '),
+    imageUrl: card.id ? `${CARDSIGHT_IMAGE_PREFIX}${card.id}` : undefined,
     fields,
     source: 'CardSight',
+    sourceId: card.id,
   };
+}
+
+// Segment → template game option. CardSight spans sports and TCGs; the
+// template's select only has five buckets, so everything maps down.
+export function segmentToGame(segment: string): string {
+  switch (segment.trim().toLowerCase()) {
+    case 'baseball':
+    case 'football':
+    case 'basketball':
+    case 'hockey':
+    case 'soccer':
+      return 'Sports';
+    case 'pokemon':
+    case 'pokémon':
+      return 'Pokémon';
+    case 'magic':
+    case 'magic: the gathering':
+      return 'Magic: The Gathering';
+    case 'yu-gi-oh':
+    case 'yu-gi-oh!':
+    case 'yugioh':
+      return 'Yu-Gi-Oh!';
+    default:
+      return 'Other';
+  }
+}
+
+// Pulls a string (or stringable number) out of an untyped detail payload.
+function detailString(card: Record<string, unknown>, keys: string[]): string | undefined {
+  for (const key of keys) {
+    const value = card[key];
+    if (typeof value === 'string' && value.trim()) return value;
+    if (typeof value === 'number') return String(value);
+  }
+  return undefined;
 }
 
 // Main
@@ -151,5 +191,47 @@ export const tradingCardsAdapter: MetadataAdapter = {
       results.push(...(scryfall.value.data ?? []).slice(0, MAX_PER_SOURCE).map(mapScryfall));
     }
     return results;
+  },
+
+  // Second pass after a pick — CardSight's search rows are thin, so hit the
+  // card-detail endpoint for card number / segment / rarity. Defensive on
+  // the payload shape (keys have shifted before) and any failure hands the
+  // original result straight back.
+  async enrich(result) {
+    if (result.source !== 'CardSight' || !result.sourceId) return result;
+
+    try {
+      const detail = await callMetadata<Record<string, unknown>>({
+        source: 'cardsight',
+        op: 'lookup',
+        params: { id: result.sourceId },
+      });
+
+      // Some payloads nest the card under a `card` key, some are flat.
+      const nested = detail?.card;
+      const card = (
+        nested && typeof nested === 'object' ? nested : detail
+      ) as Record<string, unknown> | null;
+      if (!card || typeof card !== 'object') return result;
+
+      const fields: FieldValues = { ...result.fields };
+
+      const cardNumber = detailString(card, ['cardNumber', 'number', 'card_number']);
+      if (cardNumber) fields.card_number = cardNumber;
+
+      const segment = detailString(card, ['segment', 'segmentName', 'sport', 'category']);
+      if (segment) fields.game = segmentToGame(segment);
+
+      const rarity = detailString(card, ['rarity', 'rarityName']);
+      if (rarity) fields.rarity = rarity;
+
+      const variant = detailString(card, ['parallelName', 'variant']);
+      if (variant) fields.variant = variant;
+
+      return { ...result, fields };
+    } catch {
+      // Enrichment is a bonus, never a blocker.
+      return result;
+    }
   },
 };

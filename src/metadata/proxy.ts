@@ -28,7 +28,9 @@ export type ProxySource =
 
 export interface ProxyRequest {
   source: ProxySource;
-  op: 'search' | 'lookup';
+  // 'image' is cardsight-only — the function answers with raw image bytes
+  // instead of JSON (see saveLookupImage's sentinel path).
+  op: 'search' | 'lookup' | 'image';
   params: Record<string, string>;
 }
 

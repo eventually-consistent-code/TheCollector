@@ -16,6 +16,7 @@ import { useTheme } from '@/hooks/use-theme';
 import type { MetadataAdapter, MetadataResult } from '@/metadata';
 import {
   createTypeahead,
+  isRenderableImageUrl,
   type TypeaheadController,
   type TypeaheadState,
 } from '@/metadata/typeahead';
@@ -64,7 +65,7 @@ function SuggestionRow({
   const theme = useTheme();
   return (
     <Pressable onPress={() => onPick(result)} style={styles.row}>
-      {result.imageUrl ? (
+      {isRenderableImageUrl(result.imageUrl) ? (
         <Image
           source={{ uri: result.imageUrl }}
           style={[styles.thumb, { borderColor: theme.hairline }]}
