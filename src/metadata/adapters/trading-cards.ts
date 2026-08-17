@@ -1,8 +1,9 @@
 /**
- * Purpose: Trading cards adapter — CardSight (cross-TCG + sports, 12M+
- * cards, keyed → proxied) merged with Scryfall (MTG) and Pokémon TCG API
- * (both keyless, direct). Cards carry no barcodes, so this is text-search
- * only — CardSight finally covers the sports-card gap.
+ * Purpose: Trading cards adapter — TCGPriceLookup (keyed → proxied, image +
+ * per-condition prices in one search response) and CardSight (cross-TCG +
+ * sports, 12M+ cards, keyed → proxied) merged with Scryfall (MTG) and
+ * Pokémon TCG API (both keyless, direct). Cards carry no barcodes, so this
+ * is text-search only — CardSight finally covers the sports-card gap.
  * Author(s): John Reed
  */
 
@@ -119,8 +120,76 @@ function mapCardSight(card: CardSightResult): MetadataResult {
   };
 }
 
+// TCGPriceLookup
+
+interface TcgplConditionPrices {
+  tcgplayer?: { market?: number; low?: number; mid?: number; high?: number };
+}
+
+interface TcgplCard {
+  id?: string;
+  name: string;
+  number?: string;
+  rarity?: string;
+  variant?: string;
+  image_url?: string;
+  set?: { name?: string; slug?: string };
+  game?: { name?: string; slug?: string };
+  prices?: { raw?: Record<string, TcgplConditionPrices | undefined> };
+}
+
+interface TcgplSearchResponse {
+  data?: TcgplCard[];
+}
+
+// Condition ladder for the value estimate: near-mint market is the standard
+// quote, then progressively rougher conditions when it's missing. Buckets
+// can be empty objects — dollars → cents, null when nothing numeric.
+export function pickTcgplPriceCents(prices: TcgplCard['prices']): number | null {
+  const raw = prices?.raw;
+  if (!raw || typeof raw !== 'object') return null;
+
+  const ladder = [
+    'near_mint',
+    'lightly_played',
+    'moderately_played',
+    'heavily_played',
+    'damaged',
+    'mint',
+  ];
+  for (const condition of ladder) {
+    const market = raw[condition]?.tcgplayer?.market;
+    if (typeof market === 'number' && Number.isFinite(market) && market > 0) {
+      return Math.round(market * 100);
+    }
+  }
+  return null;
+}
+
+function mapTcgPriceLookup(card: TcgplCard): MetadataResult {
+  const fields: FieldValues = {};
+  if (card.set?.name) fields.set_name = card.set.name;
+  if (card.number) fields.card_number = card.number;
+  if (card.rarity) fields.rarity = card.rarity;
+  if (card.variant) fields.variant = card.variant;
+  // Slug is the stable key; the display name is the fallback.
+  const game = card.game?.slug ?? card.game?.name;
+  if (game) fields.game = segmentToGame(game);
+
+  return {
+    title: card.name,
+    subtitle: [card.set?.name, card.number].filter(Boolean).join(' · ') || undefined,
+    // Plain https CDN url — popover thumbs and the save path just work.
+    imageUrl: card.image_url,
+    fields,
+    source: 'TCGPriceLookup',
+    valueCents: pickTcgplPriceCents(card.prices) ?? undefined,
+  };
+}
+
 // Segment → template game option. CardSight spans sports and TCGs; the
 // template's select only has five buckets, so everything maps down.
+// TCGPriceLookup game slugs ride the same switch (pokemon, mtg, yugioh).
 export function segmentToGame(segment: string): string {
   switch (segment.trim().toLowerCase()) {
     case 'baseball':
@@ -133,6 +202,7 @@ export function segmentToGame(segment: string): string {
     case 'pokémon':
       return 'Pokémon';
     case 'magic':
+    case 'mtg':
     case 'magic: the gathering':
       return 'Magic: The Gathering';
     case 'yu-gi-oh':
@@ -193,9 +263,15 @@ export const tradingCardsAdapter: MetadataAdapter = {
     const trimmed = query.trim();
     const encoded = encodeURIComponent(trimmed);
 
-    // All three in parallel; any one failing (404 on no Scryfall match is
-    // routine, CardSight needs its key deployed) just contributes nothing.
-    const [cardsight, scryfall, pokemon] = await Promise.allSettled([
+    // All four in parallel; any one failing (404 on no Scryfall match is
+    // routine, the keyed sources need their keys deployed) just contributes
+    // nothing.
+    const [tcgpl, cardsight, scryfall, pokemon] = await Promise.allSettled([
+      callMetadata<TcgplSearchResponse>({
+        source: 'tcgpricelookup',
+        op: 'search',
+        params: { q: trimmed },
+      }),
       callMetadata<CardSightSearchResponse>({
         source: 'cardsight',
         op: 'search',
@@ -206,6 +282,10 @@ export const tradingCardsAdapter: MetadataAdapter = {
     ]);
 
     const results: MetadataResult[] = [];
+    // TCGPriceLookup first — its rows are the richest (image + prices).
+    if (tcgpl.status === 'fulfilled') {
+      results.push(...(tcgpl.value.data ?? []).slice(0, MAX_PER_SOURCE).map(mapTcgPriceLookup));
+    }
     if (cardsight.status === 'fulfilled') {
       results.push(
         ...(cardsight.value.results ?? [])

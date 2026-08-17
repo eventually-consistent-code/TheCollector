@@ -20,6 +20,7 @@ export type ProxySource =
   | 'comicvine'
   | 'rebrickable'
   | 'cardsight'
+  | 'tcgpricelookup'
   | 'art'
   | 'books'
   | 'timepieces'

@@ -344,6 +344,171 @@ describe('trading-cards adapter — cardsight', () => {
   });
 });
 
+// TCGPriceLookup (trading cards, proxied) — search-only source: one response
+// carries the image CDN url and per-condition TCGplayer prices.
+
+describe('trading-cards adapter — tcgpricelookup', () => {
+  const { tradingCardsAdapter } = require('../adapters/trading-cards');
+
+  const row = {
+    id: 'tcgpl-1',
+    tcgplayer_id: 12345,
+    name: 'Charizard',
+    number: '4/102',
+    rarity: 'Holo Rare',
+    variant: 'Unlimited',
+    image_url: 'https://cdn.tcgpricelookup.com/cards/tcgpl-1.jpg',
+    set: { name: 'Base Set', slug: 'base-set' },
+    game: { name: 'Pokémon', slug: 'pokemon' },
+    prices: {
+      raw: { near_mint: { tcgplayer: { market: 312.5, low: 250, mid: 300, high: 400 } } },
+    },
+  };
+
+  // Answers by source so the fan-out's two proxied calls stay distinct.
+  const mockSources = (tcgpl: unknown, cardsight: unknown = { results: [] }) => {
+    invoke.mockImplementation((_fn, { body }) =>
+      Promise.resolve(
+        body.source === 'tcgpricelookup'
+          ? { data: tcgpl, error: tcgpl == null ? new Error('no key deployed') : null }
+          : { data: cardsight, error: null },
+      ),
+    );
+  };
+
+  beforeEach(() => {
+    // Keyless direct sources offline, same stance as the cardsight block.
+    global.fetch = jest.fn().mockRejectedValue(new Error('down')) as unknown as typeof fetch;
+  });
+
+  it('maps a row onto template fields with a plain https image + value', async () => {
+    mockSources({ data: [row] });
+
+    const results = await tradingCardsAdapter.searchByText('charizard');
+
+    expect(results).toHaveLength(1);
+    const hit = results[0];
+    expect(hit.title).toBe('Charizard');
+    expect(hit.subtitle).toBe('Base Set · 4/102');
+    expect(hit.source).toBe('TCGPriceLookup');
+    // Plain https url — no sentinel, popover thumbs render it directly.
+    expect(hit.imageUrl).toBe('https://cdn.tcgpricelookup.com/cards/tcgpl-1.jpg');
+    expect(hit.fields).toEqual({
+      set_name: 'Base Set',
+      card_number: '4/102',
+      rarity: 'Holo Rare',
+      variant: 'Unlimited',
+      game: 'Pokémon',
+    });
+    expect(hit.valueCents).toBe(31250);
+    expect(invoke).toHaveBeenCalledWith('metadata', {
+      body: { source: 'tcgpricelookup', op: 'search', params: { q: 'charizard' } },
+    });
+  });
+
+  it('orders tcgpricelookup rows ahead of cardsight', async () => {
+    mockSources(
+      { data: [{ ...row, name: 'TCGPL Row' }] },
+      { results: [{ type: 'card', id: 'cs-1', name: 'CardSight Row' }] },
+    );
+
+    const results = await tradingCardsAdapter.searchByText('charizard');
+
+    expect(results.map((r: { source: string }) => r.source)).toEqual([
+      'TCGPriceLookup',
+      'CardSight',
+    ]);
+    expect(results[0].title).toBe('TCGPL Row');
+  });
+
+  it('contributes nothing when the source is down', async () => {
+    mockSources(null, { results: [{ type: 'card', name: 'Survivor' }] });
+
+    const results = await tradingCardsAdapter.searchByText('charizard');
+
+    expect(results).toHaveLength(1);
+    expect(results[0].source).toBe('CardSight');
+  });
+
+  it('omits subtitle, value, and fields on a sparse row', async () => {
+    mockSources({ data: [{ name: 'Mystery', prices: { raw: { near_mint: {} } } }] });
+
+    const results = await tradingCardsAdapter.searchByText('mystery');
+
+    expect(results).toHaveLength(1);
+    expect(results[0].subtitle).toBeUndefined();
+    expect(results[0].valueCents).toBeUndefined();
+    expect(results[0].fields).toEqual({});
+  });
+
+  test.each([
+    ['pokemon', 'Pokémon'],
+    ['mtg', 'Magic: The Gathering'],
+    ['magic', 'Magic: The Gathering'],
+    ['yugioh', 'Yu-Gi-Oh!'],
+    ['yu-gi-oh', 'Yu-Gi-Oh!'],
+    ['lorcana', 'Other'],
+  ])('maps game slug %s → %s', async (slug, expected) => {
+    mockSources({ data: [{ ...row, game: { name: 'Whatever', slug } }] });
+
+    const results = await tradingCardsAdapter.searchByText('x');
+
+    expect(results[0].fields.game).toBe(expected);
+  });
+
+  it('falls back to the game name when the slug is missing', async () => {
+    mockSources({ data: [{ ...row, game: { name: 'Yu-Gi-Oh!' } }] });
+
+    const results = await tradingCardsAdapter.searchByText('x');
+
+    expect(results[0].fields.game).toBe('Yu-Gi-Oh!');
+  });
+});
+
+// TCGPriceLookup price picker — pure condition ladder over prices.raw.
+
+describe('pickTcgplPriceCents', () => {
+  const { pickTcgplPriceCents } = require('../adapters/trading-cards');
+
+  it('prefers near-mint market over rougher conditions', () => {
+    expect(
+      pickTcgplPriceCents({
+        raw: {
+          near_mint: { tcgplayer: { market: 12.34 } },
+          lightly_played: { tcgplayer: { market: 9.99 } },
+        },
+      }),
+    ).toBe(1234);
+  });
+
+  it('walks the ladder past empty buckets', () => {
+    expect(
+      pickTcgplPriceCents({
+        raw: {
+          near_mint: {},
+          lightly_played: { tcgplayer: {} },
+          moderately_played: { tcgplayer: { market: 4.2 } },
+        },
+      }),
+    ).toBe(420);
+  });
+
+  it('falls all the way down to mint', () => {
+    expect(pickTcgplPriceCents({ raw: { mint: { tcgplayer: { market: 1 } } } })).toBe(100);
+  });
+
+  it('returns null when nothing numeric anywhere', () => {
+    expect(pickTcgplPriceCents({ raw: { near_mint: {}, damaged: {} } })).toBeNull();
+    expect(pickTcgplPriceCents({ raw: {} })).toBeNull();
+    expect(pickTcgplPriceCents({})).toBeNull();
+    expect(pickTcgplPriceCents(undefined)).toBeNull();
+  });
+
+  it('rounds dollars to whole cents', () => {
+    expect(pickTcgplPriceCents({ raw: { near_mint: { tcgplayer: { market: 0.015 } } } })).toBe(2);
+  });
+});
+
 // CardSight enrich-on-pick — detail lookup merges card number / game / rarity.
 
 describe('trading-cards adapter — enrich', () => {

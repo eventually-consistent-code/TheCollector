@@ -171,6 +171,25 @@ async function cardsight(op: string, params: Record<string, string>): Promise<Re
   return json(await response.json());
 }
 
+// tcgpricelookup — TCG catalog where one search response carries everything
+// (public CDN image urls + TCGplayer prices per condition), so search is the
+// only op. No game filter on purpose — the collector's query stays broad.
+// Rides the text-query cache; the fetcher throws on failure so a bad
+// response is never stored.
+async function tcgPriceLookup(params: Record<string, string>): Promise<Response> {
+  return cachedSource('tcgpricelookup', params.q ?? '', async (normalized) => {
+    const url = new URL('https://api.tcgpricelookup.com/v1/cards/search');
+    url.searchParams.set('q', normalized);
+    url.searchParams.set('limit', '8');
+
+    const response = await fetch(url, {
+      headers: { 'X-API-Key': env('TCGPRICELOOKUP_API_KEY'), 'User-Agent': USER_AGENT },
+    });
+    if (!response.ok) throw new Error(`tcgpricelookup ${response.status}`);
+    return await response.json();
+  });
+}
+
 // OMDb over TMDB: TMDB's commercial license runs ~$150/mo; OMDb's free tier
 // (1,000/day) and cheap patron tiers fit a commercial app.
 async function omdb(params: Record<string, string>): Promise<Response> {
@@ -276,6 +295,8 @@ Deno.serve(async (request) => {
         return await igdb(params);
       case 'cardsight':
         return await cardsight(op, params);
+      case 'tcgpricelookup':
+        return await tcgPriceLookup(params);
       case 'omdb':
         return await omdb(params);
       case 'comicvine':
