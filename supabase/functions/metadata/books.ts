@@ -73,6 +73,28 @@ interface GoogleVolume {
 // throttled first when they shed load.
 const OL_USER_AGENT = 'TheCollector/1.0 (jsreed@pm.me)';
 
+// Open Library has real outages (2026-08-16: TCP connect timeouts from
+// every vantage point) — fail fast into the Google fallback instead of
+// letting the platform's long connect timeout eat the whole request.
+const OL_TIMEOUT_MS = 6_000;
+
+// Wraps a fetch in an abort timer; the caller's catch decides what a
+// timeout means (here: try the other upstream).
+async function fetchWithTimeout(
+  fetchFn: typeof fetch,
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetchFn(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // Upstreams
 
 async function openLibraryLookup(isbn: string, fetchFn: typeof fetch): Promise<BookHit[]> {
@@ -81,9 +103,12 @@ async function openLibraryLookup(isbn: string, fetchFn: typeof fetch): Promise<B
   url.searchParams.set('format', 'json');
   url.searchParams.set('jscmd', 'data');
 
-  const response = await fetchFn(url.toString(), {
-    headers: { 'User-Agent': OL_USER_AGENT },
-  });
+  const response = await fetchWithTimeout(
+    fetchFn,
+    url.toString(),
+    { headers: { 'User-Agent': OL_USER_AGENT } },
+    OL_TIMEOUT_MS,
+  );
   // Throw, never return — a bad response must not reach the cache.
   if (!response.ok) throw new Error(`openlibrary ${response.status}`);
 
@@ -110,9 +135,12 @@ async function openLibrarySearch(q: string, fetchFn: typeof fetch): Promise<Book
   url.searchParams.set('fields', 'title,author_name,first_publish_year,publisher,isbn,cover_i');
   url.searchParams.set('limit', '10');
 
-  const response = await fetchFn(url.toString(), {
-    headers: { 'User-Agent': OL_USER_AGENT },
-  });
+  const response = await fetchWithTimeout(
+    fetchFn,
+    url.toString(),
+    { headers: { 'User-Agent': OL_USER_AGENT } },
+    OL_TIMEOUT_MS,
+  );
   if (!response.ok) throw new Error(`openlibrary ${response.status}`);
 
   const body = (await response.json()) as { docs?: OlSearchDoc[] };
@@ -165,33 +193,57 @@ async function googleBooks(query: string, key: string, fetchFn: typeof fetch): P
 
 // Main
 
-// ISBN path: Open Library's book API, Google fallback on a clean miss.
+// Open Library first; Google steps in on a clean miss AND on OL being down
+// (timeout / transport error / 5xx). Only when both paths are exhausted
+// does an error escape — with a human message, since the client renders it.
+async function withFallback(
+  ol: () => Promise<BookHit[]>,
+  google: (() => Promise<BookHit[]>) | null,
+): Promise<{ results: BookHit[] }> {
+  let olError: unknown = null;
+  try {
+    const hits = await ol();
+    if (hits.length > 0) return { results: hits };
+  } catch (error) {
+    olError = error;
+  }
+
+  // No key deployed → the fallback simply does not exist. An OL outage with
+  // no fallback surfaces as a clean, human-sized message.
+  if (!google) {
+    if (olError) throw new Error('book lookup is temporarily unavailable — try again shortly');
+    return { results: [] };
+  }
+
+  try {
+    return { results: await google() };
+  } catch {
+    throw new Error('book lookup is temporarily unavailable — try again shortly');
+  }
+}
+
+// ISBN path.
 export async function booksLookup(
   isbn: string,
   opts: BooksOptions = {},
 ): Promise<{ results: BookHit[] }> {
   const fetchFn = opts.fetchFn ?? fetch;
-
-  const hits = await openLibraryLookup(isbn, fetchFn);
-  if (hits.length > 0) return { results: hits };
-
-  // No key deployed → the fallback simply does not exist. Not an error.
-  if (!opts.googleKey) return { results: [] };
-  return { results: await googleBooks(`isbn:${isbn}`, opts.googleKey, fetchFn) };
+  return withFallback(
+    () => openLibraryLookup(isbn, fetchFn),
+    opts.googleKey ? () => googleBooks(`isbn:${isbn}`, opts.googleKey!, fetchFn) : null,
+  );
 }
 
-// Text path: Open Library search, same fallback rules.
+// Text path.
 export async function booksSearch(
   q: string,
   opts: BooksOptions = {},
 ): Promise<{ results: BookHit[] }> {
   const fetchFn = opts.fetchFn ?? fetch;
-
-  const hits = await openLibrarySearch(q, fetchFn);
-  if (hits.length > 0) return { results: hits };
-
-  if (!opts.googleKey) return { results: [] };
-  return { results: await googleBooks(q, opts.googleKey, fetchFn) };
+  return withFallback(
+    () => openLibrarySearch(q, fetchFn),
+    opts.googleKey ? () => googleBooks(q, opts.googleKey!, fetchFn) : null,
+  );
 }
 
 // Route + cache — every upstream fetch rides cachedSource, so any ISBN or

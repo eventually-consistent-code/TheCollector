@@ -116,10 +116,25 @@ describe('booksLookup — Open Library', () => {
     );
   });
 
-  it('throws on an upstream error so nothing bad reaches the cache', async () => {
+  it('throws a HUMAN message on an upstream error (still throws — nothing bad caches)', async () => {
     const { fetchFn } = fakeFetch([{ match: 'openlibrary.org/api/books', status: 503 }]);
 
-    await expect(booksLookup('9780441172719', { fetchFn })).rejects.toThrow('openlibrary 503');
+    await expect(booksLookup('9780441172719', { fetchFn })).rejects.toThrow(
+      'temporarily unavailable'
+    );
+  });
+
+  it('fails over to Google when Open Library errors and a key is present', async () => {
+    const { fetchFn, calls } = fakeFetch([
+      { match: 'openlibrary.org/api/books', status: 503 },
+      { match: 'googleapis.com/books', body: GOOGLE_VOLUMES },
+    ]);
+
+    const out = await booksLookup('9780441172719', { fetchFn, googleKey: 'k' });
+
+    expect(out.results.length).toBeGreaterThan(0);
+    expect(out.results[0].source).toBe('Google Books');
+    expect(calls.some((c) => c.url.includes('googleapis.com'))).toBe(true);
   });
 });
 

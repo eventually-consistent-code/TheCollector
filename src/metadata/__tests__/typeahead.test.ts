@@ -311,3 +311,28 @@ describe('estimateValueCents live shape', () => {
     ).toBe(15750);
   });
 });
+
+// Hint sanitization — plumbing never reaches the popover
+
+import { friendlyHint } from '../typeahead';
+
+describe('friendlyHint', () => {
+  it('passes curated human messages through', () => {
+    expect(friendlyHint('too many matches — add the reference number')).toBe(
+      'too many matches — add the reference number'
+    );
+    expect(friendlyHint('book lookup is temporarily unavailable — try again shortly')).toBe(
+      'book lookup is temporarily unavailable — try again shortly'
+    );
+  });
+
+  it('replaces transport guts and oversized messages with generic copy', () => {
+    const tcp =
+      'error sending request for url (https://openlibrary.org/search.json?q=x): client error (Connect): tcp connect error: Connection timed out (os error 110)';
+    expect(friendlyHint(tcp)).toBe('lookup trouble — try again in a moment, or keep typing');
+    expect(friendlyHint('x'.repeat(200))).toBe(
+      'lookup trouble — try again in a moment, or keep typing'
+    );
+    expect(friendlyHint('')).toBe('lookup trouble — try again in a moment, or keep typing');
+  });
+});

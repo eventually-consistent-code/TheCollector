@@ -15,6 +15,20 @@ import type { MetadataAdapter, MetadataResult } from './types';
 
 // Constants
 
+// Curated in-band messages (quota, refine, availability) read like human
+// sentences; transport failures read like stack traces. Only the former
+// belong in a hint row — anything smelling of plumbing gets generic copy.
+// (2026-08-16: an Open Library TCP timeout printed its whole error chain
+// into the popover.)
+const TECHNICAL_HINT = /error sending request|tcp |os error|ECONN|ETIMEDOUT|fetch failed|network request/i;
+const HINT_MAX_CHARS = 120;
+export function friendlyHint(message: string): string {
+  if (!message || TECHNICAL_HINT.test(message) || message.length > HINT_MAX_CHARS) {
+    return 'lookup trouble — try again in a moment, or keep typing';
+  }
+  return message;
+}
+
 // Don't bother the sources until the query looks like a real title.
 export const TYPEAHEAD_MIN_CHARS = 3;
 // Trailing-edge quiet window — long enough to skip most mid-word states.
@@ -82,7 +96,7 @@ export function createTypeahead({
       // friendly hint; anything else stays quiet — the type-ahead is a
       // convenience, never a gate on manual entry.
       if (error instanceof MetadataProxyError) {
-        onState({ kind: 'hint', message: error.message });
+        onState({ kind: 'hint', message: friendlyHint(error.message) });
       } else {
         onState({ kind: 'idle' });
       }
