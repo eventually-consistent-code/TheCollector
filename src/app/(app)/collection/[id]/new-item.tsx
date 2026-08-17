@@ -11,6 +11,7 @@ import { ItemForm } from '@/components/item-form';
 import { ThemedView } from '@/components/themed-view';
 import { createItem } from '@/db/crud';
 import { useCollection } from '@/db/hooks';
+import { saveLookupImage } from '@/db/lookup-image';
 import { templateFor } from '@/templates';
 
 // Scan hands prefill over as a JSON search param; bad JSON just means an
@@ -18,7 +19,11 @@ import { templateFor } from '@/templates';
 function parsePrefill(raw: string | undefined) {
   if (!raw) return undefined;
   try {
-    return JSON.parse(raw) as { name?: string; customFields?: Record<string, string | number | boolean> };
+    return JSON.parse(raw) as {
+      name?: string;
+      customFields?: Record<string, string | number | boolean>;
+      imageUrl?: string;
+    };
   } catch {
     return undefined;
   }
@@ -30,18 +35,27 @@ export default function NewItemScreen() {
   const { session } = useSession();
   const { data: collectionRows } = useCollection(id);
   const template = templateFor(collectionRows?.[0]?.vertical);
+  const parsed = parsePrefill(prefill);
 
   return (
     <ThemedView style={{ flex: 1 }}>
       <ItemForm
         template={template}
-        prefill={parsePrefill(prefill)}
+        prefill={parsed}
         saveLabel="Add Item"
         onSave={async (input) => {
           if (!session) {
             return;
           }
-          await createItem(db, id, input, session.user.id);
+          const itemId = await createItem(db, id, input, session.user.id);
+          // Lookup cover art rides along after the save — fire-and-forget,
+          // never blocks the form and never fails the item.
+          void saveLookupImage({
+            db,
+            itemId,
+            userId: session.user.id,
+            imageUrl: parsed?.imageUrl,
+          });
           router.back();
         }}
       />
