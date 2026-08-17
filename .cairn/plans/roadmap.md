@@ -1,3 +1,6 @@
+---
+milestone: 2
+---
 # TheCollector — Roadmap
 
 | Phase | Name | Status |
@@ -12,3 +15,7 @@
 | 6.5 | Estate & Ember UI — implement Stitch visual system | verified |
 | 6.7 | App Shell — tabs, Dashboard, Profile, collection cover art | verified |
 | 7 | Value tracking + stats | verified |
+
+## Archived — v1
+
+TheCollector v1: local-first collection tracker — 12 verticals with live metadata lookups + barcode scan, offline search/filter/tags, Estate & Ember UI with tab shell and dashboard, photo heroes with self-healing offline images, and value tracking with history-fed charts. 430 tests, 10 verified phases. — see milestones/v1/
