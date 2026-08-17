@@ -5,7 +5,7 @@
  * Author(s): John Reed
  */
 
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ActionButton, Field } from '@/components/form';
@@ -79,9 +79,21 @@ export function ItemForm({
   // an existing row never fires it (initial disables the controller).
   const suggest = useNameLookup(lookup?.adapter, !initial);
 
+  // Source-link from a type-ahead pick — refs, not state, same treatment as
+  // cover art in new-item.tsx: nothing re-renders, save() reads what landed.
+  const pickedSource = useRef<{ source?: string; sourceId?: string }>({});
+  // Who supplied the value figure — an enrich fill stamps its source; the
+  // collector typing in the field wipes it back to manual.
+  const valueSource = useRef<string | undefined>(undefined);
+
   const changeName = (text: string) => {
     setName(text);
     suggest.setQuery(text);
+  };
+
+  const changeValue = (text: string) => {
+    valueSource.current = undefined;
+    setValue(text);
   };
 
   // Pick-to-fill — same mapping the scan prefill uses; cover art is stashed
@@ -94,6 +106,9 @@ export function ItemForm({
     setName(fill.name);
     setCustom((prev) => ({ ...prev, ...fill.customFields }));
     lookup?.onImageUrl(fill.imageUrl);
+    // Remember where this fill came from — persisted with the item so the
+    // detail view can attribute it (and enrich passes can re-fetch by id).
+    pickedSource.current = { source: result.source, sourceId: result.sourceId };
     suggest.dismiss();
 
     const adapter = lookup?.adapter;
@@ -107,9 +122,14 @@ export function ItemForm({
         if (!enriched || enriched === result) return;
         setCustom((prev) => ({ ...prev, ...fillFromResult(enriched).customFields }));
         // Sales-comp estimate lands in the item-level value field, but only
-        // when the collector hasn't already typed one.
+        // when the collector hasn't already typed one. When it does land,
+        // the history row it seeds carries the source's name, not 'manual'.
         if (enriched.valueCents != null) {
-          setValue((prev) => prev || centsToDisplay(enriched.valueCents!).slice(1));
+          setValue((prev) => {
+            if (prev) return prev;
+            valueSource.current = enriched.source;
+            return centsToDisplay(enriched.valueCents!).slice(1);
+          });
         }
       })
       .catch(() => {
@@ -126,6 +146,11 @@ export function ItemForm({
       currentValueCents: displayToCents(value) ?? undefined,
       customFields: Object.keys(custom).length ? custom : undefined,
       tags: tags.length ? tags : undefined,
+      // Undefined when nothing was picked — updateItem then leaves the
+      // stored source-link alone; createItem stores null.
+      source: pickedSource.current.source,
+      sourceId: pickedSource.current.sourceId,
+      valueSource: valueSource.current,
     });
 
   return (
@@ -165,7 +190,7 @@ export function ItemForm({
       <Field
         label="Current value ($)"
         value={value}
-        onChangeText={setValue}
+        onChangeText={changeValue}
         keyboardType="decimal-pad"
         placeholder="20.00"
         style={styles.money}

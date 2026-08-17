@@ -16,6 +16,7 @@ import {
   createItem,
   deleteCollection,
   deleteItem,
+  listValueHistory,
   normalizeTags,
   parseCustomFields,
   parseTags,
@@ -261,6 +262,160 @@ describe('parseTags', () => {
     ['["vinyl","rare"]', ['vinyl', 'rare']],
   ])('%p → %p', (raw, expected) => {
     expect(parseTags(raw as string | null)).toEqual(expected);
+  });
+});
+
+describe('value history', () => {
+  let collectionId: string;
+
+  beforeEach(async () => {
+    collectionId = await createCollection(db, { name: 'Cards', vertical: 'trading-cards', userId: U1 });
+  });
+
+  test('create with a value appends the first history row', async () => {
+    const id = await createItem(db, collectionId, {
+      name: 'Charizard Base Set',
+      currentValueCents: 250000,
+    }, U1);
+
+    const rows = await listValueHistory(db, id);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].item_id).toBe(id);
+    expect(rows[0].value_cents).toBe(250000);
+    expect(rows[0].recorded_at).toBeTruthy();
+    // No valueSource given — the collector typed it.
+    expect(rows[0].source).toBe('manual');
+
+    const raw = await db.get<any>('SELECT user_id FROM item_value_history WHERE item_id = ?', [id]);
+    expect(raw.user_id).toBe(U1);
+  });
+
+  test('create without a value appends nothing', async () => {
+    const id = await createItem(db, collectionId, { name: 'Raw common' }, U1);
+
+    expect(await listValueHistory(db, id)).toHaveLength(0);
+  });
+
+  test('value change on update appends; valueSource rides along', async () => {
+    const id = await createItem(db, collectionId, {
+      name: 'Pikachu Illustrator',
+      currentValueCents: 100,
+    }, U1);
+    // ms-precision timestamps — a beat between writes keeps order stable.
+    await new Promise((r) => setTimeout(r, 2));
+    await updateItem(db, id, {
+      name: 'Pikachu Illustrator',
+      currentValueCents: 200,
+      valueSource: 'cardsight',
+    });
+
+    const rows = await listValueHistory(db, id);
+    expect(rows).toHaveLength(2);
+    expect(rows.map((r) => r.value_cents)).toEqual([100, 200]);
+    expect(rows.map((r) => r.source)).toEqual(['manual', 'cardsight']);
+  });
+
+  test('same value on update appends nothing', async () => {
+    const id = await createItem(db, collectionId, {
+      name: 'Blastoise',
+      currentValueCents: 5000,
+    }, U1);
+    await updateItem(db, id, { name: 'Blastoise (holo)', currentValueCents: 5000 });
+
+    expect(await listValueHistory(db, id)).toHaveLength(1);
+  });
+
+  test('value-absent update appends nothing', async () => {
+    const id = await createItem(db, collectionId, {
+      name: 'Venusaur',
+      currentValueCents: 4000,
+    }, U1);
+    // Value omitted — the update clears the column but never fakes a point.
+    await updateItem(db, id, { name: 'Venusaur' });
+
+    // Only the create-time row — the clearing update never fakes a point.
+    expect(await listValueHistory(db, id)).toHaveLength(1);
+    const row = await db.get<any>('SELECT current_value_cents FROM items WHERE id = ?', [id]);
+    expect(row.current_value_cents).toBeNull();
+  });
+
+  test('legacy rows without history stay untouched and queryable', async () => {
+    // Pre-phase-7 shape: no value at create, edits that never touch value.
+    const id = await createItem(db, collectionId, { name: 'Old-timer' }, U1);
+    await updateItem(db, id, { name: 'Old-timer, renamed' });
+
+    expect(await listValueHistory(db, id)).toEqual([]);
+    const row = await db.get<any>('SELECT * FROM items WHERE id = ?', [id]);
+    expect(row.name).toBe('Old-timer, renamed');
+    expect(row.source).toBeNull();
+    expect(row.source_id).toBeNull();
+  });
+
+  test('history rows scope to their own item, oldest first', async () => {
+    // Tiny gaps so recorded_at (ms precision) never ties — ordering is
+    // what this test is about.
+    const tick = () => new Promise((r) => setTimeout(r, 2));
+    const a = await createItem(db, collectionId, { name: 'A', currentValueCents: 1 }, U1);
+    const b = await createItem(db, collectionId, { name: 'B', currentValueCents: 10 }, U1);
+    await tick();
+    await updateItem(db, a, { name: 'A', currentValueCents: 2 });
+    await tick();
+    await updateItem(db, a, { name: 'A', currentValueCents: 3 });
+
+    const rowsA = await listValueHistory(db, a);
+    const rowsB = await listValueHistory(db, b);
+    expect(rowsA.map((r) => r.value_cents)).toEqual([1, 2, 3]);
+    expect(rowsB.map((r) => r.value_cents)).toEqual([10]);
+  });
+
+  test('item_id index exists for history lookups', async () => {
+    const indexes = await db.getAll<any>(
+      `SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE '%item_value_history%'`
+    );
+    expect(indexes.length).toBeGreaterThan(0);
+  });
+});
+
+describe('metadata source-link', () => {
+  let collectionId: string;
+
+  beforeEach(async () => {
+    collectionId = await createCollection(db, { name: 'Vinyl', vertical: 'vinyl', userId: U1 });
+  });
+
+  test('source and source_id round-trip on create', async () => {
+    const id = await createItem(db, collectionId, {
+      name: 'Kind of Blue',
+      source: 'discogs',
+      sourceId: 'r12345',
+    }, U1);
+
+    const row = await db.get<any>('SELECT source, source_id FROM items WHERE id = ?', [id]);
+    expect(row.source).toBe('discogs');
+    expect(row.source_id).toBe('r12345');
+  });
+
+  test('manual update leaves the source-link untouched', async () => {
+    const id = await createItem(db, collectionId, {
+      name: 'Abbey Road',
+      source: 'discogs',
+      sourceId: 'r67890',
+    }, U1);
+    // No source in the input — a hand edit must not strip attribution.
+    await updateItem(db, id, { name: 'Abbey Road (2019 remaster)' });
+
+    const row = await db.get<any>('SELECT source, source_id FROM items WHERE id = ?', [id]);
+    expect(row.source).toBe('discogs');
+    expect(row.source_id).toBe('r67890');
+  });
+
+  test('provided source on update overwrites', async () => {
+    const id = await createItem(db, collectionId, { name: 'Blue Train' }, U1);
+    await updateItem(db, id, { name: 'Blue Train', source: 'discogs', sourceId: 'r111' });
+
+    const row = await db.get<any>('SELECT source, source_id FROM items WHERE id = ?', [id]);
+    expect(row.source).toBe('discogs');
+    expect(row.source_id).toBe('r111');
   });
 });
 
