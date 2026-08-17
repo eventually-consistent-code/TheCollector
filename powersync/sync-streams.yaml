@@ -19,3 +19,9 @@ streams:
   user_photos:
     auto_subscribe: true
     query: SELECT * FROM photos WHERE user_id = auth.user_id()
+
+  # P7-T1 — value-history trail; deploy via the PowerSync dashboard
+  # alongside the streams above (same edition-3 config).
+  user_item_value_history:
+    auto_subscribe: true
+    query: SELECT * FROM item_value_history WHERE user_id = auth.user_id()

@@ -39,6 +39,10 @@ const items = new Table(
     custom_fields: column.text,
     // JSON array of lowercase tag strings (phase 6) — normalized in crud.ts.
     tags: column.text,
+    // Metadata source-link (phase 7) — which lookup source filled this item
+    // and the source's own id for the hit; null for hand-entered items.
+    source: column.text,
+    source_id: column.text,
     created_at: column.text,
     updated_at: column.text,
   },
@@ -56,10 +60,24 @@ const photos = new Table(
   { indexes: { item: ['item_id'] } }
 );
 
+// Value history — one row per value an item has carried (phase 7). Rows are
+// append-only from crud.ts; the portfolio chart (#45) reads them as a series.
+const item_value_history = new Table(
+  {
+    user_id: column.text,
+    item_id: column.text,
+    value_cents: column.integer,
+    recorded_at: column.text, // ISO timestamp
+    source: column.text, // 'manual' or a metadata source id
+  },
+  { indexes: { item: ['item_id'] } }
+);
+
 export const AppSchema = new Schema({
   collections,
   items,
   photos,
+  item_value_history,
   // Local-only queue state for the attachment system (never syncs).
   attachments: new AttachmentTable(),
 });
@@ -69,3 +87,4 @@ export const AppSchema = new Schema({
 export type Database = (typeof AppSchema)['types'];
 export type CollectionRecord = Database['collections'];
 export type ItemRecord = Database['items'];
+export type ItemValueHistoryRecord = Database['item_value_history'];
