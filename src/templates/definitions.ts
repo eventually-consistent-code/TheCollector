@@ -19,6 +19,7 @@ export const tradingCards: Template = {
   subtitleKeys: ['set_name', 'card_number'],
   fields: [
     { key: 'game', label: 'Game', type: 'select', options: ['Pokémon', 'Magic: The Gathering', 'Yu-Gi-Oh!', 'Sports', 'Other'] },
+    { key: 'year', label: 'Year', type: 'number' },
     { key: 'set_name', label: 'Set', type: 'text' },
     { key: 'card_number', label: 'Card Number', type: 'text', placeholder: '182/165' },
     { key: 'rarity', label: 'Rarity', type: 'text' },

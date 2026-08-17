@@ -7,6 +7,12 @@
 
 import type { FieldValues } from '@/templates/types';
 
+// CardSight card art is keyed — no public URL exists. Results carry this
+// sentinel prefix + card id instead of an https url; saveLookupImage spots
+// it and fetches the bytes through the edge function's 'image' op. UI code
+// must never hand it to an <Image>.
+export const CARDSIGHT_IMAGE_PREFIX = 'cardsight-image:';
+
 // A single lookup hit, normalized onto the vertical's template. `fields`
 // keys match the template's FieldDef keys; unknown keys are dropped by the
 // form. `title` prefills the item name.
@@ -17,6 +23,8 @@ export interface MetadataResult {
   fields: FieldValues;
   // Where this hit came from, for attribution in the picker UI.
   source: string;
+  // The source's own id for this hit — fuels enrich-on-pick detail lookups.
+  sourceId?: string;
 }
 
 // One adapter per vertical, registered by template id. Barcode lookup is
@@ -26,4 +34,8 @@ export interface MetadataAdapter {
   templateId: string;
   searchByText(query: string): Promise<MetadataResult[]>;
   lookupByBarcode?(barcode: string): Promise<MetadataResult[]>;
+  // Optional second pass after a pick — a detail lookup that fills fields
+  // the search response was too thin to carry. Must resolve to the original
+  // result on any trouble; callers race it against a short timeout.
+  enrich?(result: MetadataResult): Promise<MetadataResult>;
 }

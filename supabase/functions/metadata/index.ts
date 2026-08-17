@@ -122,16 +122,40 @@ async function igdb(params: Record<string, string>, retried = false): Promise<Re
   return json(await response.json());
 }
 
-// CardSight — cross-TCG + sports card catalog (12M+ cards), fuzzy search.
-async function cardsight(params: Record<string, string>): Promise<Response> {
+// CardSight — cross-TCG + sports card catalog (12M+ cards). Three ops:
+// search (fuzzy text), lookup (card detail by id), image (raw card art
+// bytes — the only non-JSON response this function serves).
+async function cardsight(op: string, params: Record<string, string>): Promise<Response> {
+  const headers = { 'X-API-Key': env('CARDSIGHT_API_KEY'), 'User-Agent': USER_AGENT };
+
+  if (op === 'lookup') {
+    const id = encodeURIComponent(params.id ?? '');
+    const response = await fetch(`https://api.cardsight.ai/v1/catalog/cards/${id}`, { headers });
+    if (!response.ok) return fail(`cardsight ${response.status}`, response.status);
+    return json(await response.json());
+  }
+
+  if (op === 'image') {
+    const id = encodeURIComponent(params.id ?? '');
+    const response = await fetch(`https://api.cardsight.ai/v1/images/cards/${id}`, { headers });
+    if (!response.ok) return fail(`cardsight image ${response.status}`, response.status);
+    // Pass the bytes straight through — the client saves them as the item's
+    // first photo, so JSON-wrapping would just be base64 bloat.
+    const bytes = await response.arrayBuffer();
+    return new Response(bytes, {
+      headers: {
+        ...CORS_HEADERS,
+        'Content-Type': response.headers.get('content-type') ?? 'image/jpeg',
+      },
+    });
+  }
+
   const url = new URL('https://api.cardsight.ai/v1/catalog/search');
   url.searchParams.set('q', params.q ?? '');
   url.searchParams.set('type', 'card');
   url.searchParams.set('take', '15');
 
-  const response = await fetch(url, {
-    headers: { 'X-API-Key': env('CARDSIGHT_API_KEY'), 'User-Agent': USER_AGENT },
-  });
+  const response = await fetch(url, { headers });
   if (!response.ok) return fail(`cardsight ${response.status}`, response.status);
   return json(await response.json());
 }
@@ -240,7 +264,7 @@ Deno.serve(async (request) => {
       case 'igdb':
         return await igdb(params);
       case 'cardsight':
-        return await cardsight(params);
+        return await cardsight(op, params);
       case 'omdb':
         return await omdb(params);
       case 'comicvine':

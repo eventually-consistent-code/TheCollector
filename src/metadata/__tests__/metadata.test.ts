@@ -310,17 +310,111 @@ describe('trading-cards adapter — cardsight', () => {
     expect(results[0].source).toBe('CardSight');
     expect(results[0].fields).toEqual({
       set_name: 'Topps Chrome',
+      year: 2023,
       variant: 'Refractor /25',
     });
+    // Image sentinel + source id — the save path and enrich pass run on these.
+    expect(results[0].imageUrl).toBe('cardsight-image:uuid-1');
+    expect(results[0].sourceId).toBe('uuid-1');
     expect(invoke).toHaveBeenCalledWith('metadata', {
       body: { source: 'cardsight', op: 'search', params: { q: 'aaron judge /25' } },
     });
+  });
+
+  it('drops an unparseable year and skips the sentinel without an id', async () => {
+    invoke.mockResolvedValue({
+      data: {
+        results: [{ type: 'card', name: 'Mystery Card', year: 'unknown' }],
+      },
+      error: null,
+    });
+
+    const results = await tradingCardsAdapter.searchByText('mystery');
+
+    expect(results).toHaveLength(1);
+    expect(results[0].fields.year).toBeUndefined();
+    expect(results[0].imageUrl).toBeUndefined();
+    expect(results[0].sourceId).toBeUndefined();
   });
 
   it('still returns results when cardsight is down', async () => {
     invoke.mockResolvedValue({ data: null, error: new Error('no key deployed') });
 
     await expect(tradingCardsAdapter.searchByText('pikachu')).resolves.toEqual([]);
+  });
+});
+
+// CardSight enrich-on-pick — detail lookup merges card number / game / rarity.
+
+describe('trading-cards adapter — enrich', () => {
+  const { tradingCardsAdapter, segmentToGame } = require('../adapters/trading-cards');
+
+  const base = {
+    title: 'Aaron Judge',
+    fields: { set_name: 'Topps Chrome', year: 2023 },
+    source: 'CardSight',
+    sourceId: 'uuid-1',
+  };
+
+  it('merges detail fields over the search fill', async () => {
+    invoke.mockResolvedValue({
+      data: {
+        card: { cardNumber: '99', segment: 'Baseball', rarity: 'Refractor' },
+      },
+      error: null,
+    });
+
+    const enriched = await tradingCardsAdapter.enrich!(base);
+
+    expect(enriched.fields).toEqual({
+      set_name: 'Topps Chrome',
+      year: 2023,
+      card_number: '99',
+      game: 'Sports',
+      rarity: 'Refractor',
+    });
+    expect(invoke).toHaveBeenCalledWith('metadata', {
+      body: { source: 'cardsight', op: 'lookup', params: { id: 'uuid-1' } },
+    });
+  });
+
+  it('reads a flat payload with alternate key names', async () => {
+    invoke.mockResolvedValue({
+      data: { number: '4/102', segment: 'Pokemon' },
+      error: null,
+    });
+
+    const enriched = await tradingCardsAdapter.enrich!(base);
+
+    expect(enriched.fields.card_number).toBe('4/102');
+    expect(enriched.fields.game).toBe('Pokémon');
+  });
+
+  it('returns the original result on lookup failure', async () => {
+    invoke.mockResolvedValue({ data: null, error: new Error('down') });
+
+    await expect(tradingCardsAdapter.enrich!(base)).resolves.toBe(base);
+  });
+
+  it('passes non-CardSight results straight through', async () => {
+    const scryfall = { title: 'Black Lotus', fields: {}, source: 'Scryfall' };
+
+    await expect(tradingCardsAdapter.enrich!(scryfall)).resolves.toBe(scryfall);
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    ['Baseball', 'Sports'],
+    ['Football', 'Sports'],
+    ['Basketball', 'Sports'],
+    ['Hockey', 'Sports'],
+    ['Soccer', 'Sports'],
+    ['Pokemon', 'Pokémon'],
+    ['Magic', 'Magic: The Gathering'],
+    ['Yu-Gi-Oh', 'Yu-Gi-Oh!'],
+    ['Wrestling', 'Other'],
+  ])('segmentToGame maps %s → %s', (segment, game) => {
+    expect(segmentToGame(segment)).toBe(game);
   });
 });
 

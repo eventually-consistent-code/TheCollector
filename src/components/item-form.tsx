@@ -23,6 +23,10 @@ import type { MetadataAdapter, MetadataResult } from '@/metadata';
 import { fillFromResult } from '@/metadata/typeahead';
 import type { FieldValues, Template } from '@/templates';
 
+// Enrichment is a nicety layered over a pick that already filled the form —
+// if the detail lookup dawdles past this, the base fill stands alone.
+const ENRICH_TIMEOUT_MS = 3_000;
+
 // Pre-fills from an existing row when editing.
 export function ItemForm({
   template,
@@ -78,13 +82,30 @@ export function ItemForm({
   };
 
   // Pick-to-fill — same mapping the scan prefill uses; cover art is stashed
-  // for the save path, and nothing auto-saves.
+  // for the save path, and nothing auto-saves. The base fill lands
+  // immediately; when the adapter offers a detail-lookup enrich pass, its
+  // extra fields merge in whenever they arrive (raced against a short
+  // timeout so a slow source never stalls the form).
   const pickSuggestion = (result: MetadataResult) => {
     const fill = fillFromResult(result);
     setName(fill.name);
     setCustom((prev) => ({ ...prev, ...fill.customFields }));
     lookup?.onImageUrl(fill.imageUrl);
     suggest.dismiss();
+
+    const adapter = lookup?.adapter;
+    if (!adapter?.enrich) return;
+    void Promise.race([
+      adapter.enrich(result),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), ENRICH_TIMEOUT_MS)),
+    ])
+      .then((enriched) => {
+        if (!enriched || enriched === result) return;
+        setCustom((prev) => ({ ...prev, ...fillFromResult(enriched).customFields }));
+      })
+      .catch(() => {
+        // Adapters promise to swallow their own trouble — belt and braces.
+      });
   };
 
   const save = () =>

@@ -16,6 +16,7 @@ import { MetadataProxyError } from '../proxy';
 import {
   createTypeahead,
   fillFromResult,
+  isRenderableImageUrl,
   TYPEAHEAD_DEBOUNCE_MS,
   type TypeaheadState,
 } from '../typeahead';
@@ -265,5 +266,19 @@ describe('fillFromResult', () => {
     const fill = fillFromResult(result('Plain Match'));
     expect(fill.imageUrl).toBeUndefined();
     expect(fill.name).toBe('Plain Match');
+  });
+});
+
+// Popover thumbnail guard — sentinel refs are for the save path, not <Image>.
+
+describe('isRenderableImageUrl', () => {
+  test.each([
+    ['https://img.example/x.jpg', true],
+    ['http://img.example/x.jpg', true],
+    ['cardsight-image:uuid-1', false],
+    ['', false],
+    [undefined, false],
+  ])('%s → %s', (url, expected) => {
+    expect(isRenderableImageUrl(url as string | undefined)).toBe(expected);
   });
 });

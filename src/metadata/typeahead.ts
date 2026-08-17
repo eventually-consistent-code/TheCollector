@@ -119,6 +119,12 @@ export function createTypeahead({
 
 // Pick-to-fill — the exact shape scan.tsx encodes into its prefill param
 // (title → name, template fields → customFields, cover art rides along).
+// Only real web urls belong in an <Image> — sentinel refs (cardsight-image:*)
+// exist for the save path and would just render a broken thumb.
+export function isRenderableImageUrl(url: string | undefined): url is string {
+  return !!url && url.startsWith('http');
+}
+
 export function fillFromResult(result: MetadataResult): {
   name: string;
   customFields: FieldValues;

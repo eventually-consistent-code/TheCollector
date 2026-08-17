@@ -41,6 +41,13 @@ describe('registry invariants', () => {
     }
   });
 
+  test('trading-cards carries a numeric year right after game', () => {
+    const t = templateFor('trading-cards');
+    const keys = t.fields.map((f) => f.key);
+    expect(keys.indexOf('year')).toBe(keys.indexOf('game') + 1);
+    expect(t.fields.find((f) => f.key === 'year')?.type).toBe('number');
+  });
+
   test('unknown vertical falls back to other', () => {
     expect(templateFor('does-not-exist').id).toBe('other');
     expect(templateFor(null).id).toBe('other');

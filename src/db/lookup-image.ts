@@ -9,12 +9,25 @@
 
 import type { AbstractPowerSyncDatabase } from '@powersync/common';
 
+import { supabase } from '@/auth/client';
+import { CARDSIGHT_IMAGE_PREFIX } from '@/metadata/types';
+
 import { savePhoto } from './photos';
 
 // Constants
 
 // Cover art is a nicety, not a hostage situation — give up after 10s.
 const FETCH_TIMEOUT_MS = 10_000;
+
+// Edge-function invoke shape — injectable so tests never touch supabase.
+export type MetadataInvokeFn = (body: {
+  source: string;
+  op: string;
+  params: Record<string, string>;
+}) => Promise<{ data: unknown; error: unknown }>;
+
+const defaultInvoke: MetadataInvokeFn = (body) =>
+  supabase.functions.invoke('metadata', { body });
 
 // Fetches image bytes with a timeout and light content sanity: response
 // must be ok, and the content-type must say image/ (or, when the server
@@ -49,7 +62,36 @@ export async function fetchImageBytes(
   }
 }
 
-// Everything saveLookupImage needs — fetchFn/save are injectable for tests.
+// CardSight art has no public URL — the sentinel carries the card id, and
+// the bytes come back through the metadata function's 'image' op (the app's
+// authorized channel to the keyed endpoint). supabase-js hands binary
+// content-types back as a Blob; anything else is treated as a miss.
+export async function fetchSentinelImageBytes(
+  imageUrl: string,
+  invokeFn: MetadataInvokeFn = defaultInvoke
+): Promise<ArrayBuffer | null> {
+  const id = imageUrl.slice(CARDSIGHT_IMAGE_PREFIX.length);
+  if (!id) {
+    return null;
+  }
+
+  const { data, error } = await invokeFn({ source: 'cardsight', op: 'image', params: { id } });
+  if (error || data == null) {
+    return null;
+  }
+
+  if (typeof Blob !== 'undefined' && data instanceof Blob) {
+    const bytes = await data.arrayBuffer();
+    return bytes.byteLength > 0 ? bytes : null;
+  }
+  if (data instanceof ArrayBuffer) {
+    return data.byteLength > 0 ? data : null;
+  }
+  return null;
+}
+
+// Everything saveLookupImage needs — fetchFn/save/invokeFn are injectable
+// for tests.
 export interface SaveLookupImageDeps {
   db: AbstractPowerSyncDatabase;
   itemId: string;
@@ -57,6 +99,7 @@ export interface SaveLookupImageDeps {
   imageUrl?: string;
   fetchFn?: typeof fetch;
   save?: typeof savePhoto;
+  invokeFn?: MetadataInvokeFn;
 }
 
 // Fire-and-forget entry point: no imageUrl is a no-op, and every failure
@@ -68,13 +111,18 @@ export async function saveLookupImage({
   imageUrl,
   fetchFn = fetch,
   save = savePhoto,
+  invokeFn = defaultInvoke,
 }: SaveLookupImageDeps): Promise<void> {
   if (!imageUrl) {
     return;
   }
 
   try {
-    const bytes = await fetchImageBytes(imageUrl, fetchFn);
+    // Sentinel urls resolve through the edge function; real https urls keep
+    // the plain direct fetch.
+    const bytes = imageUrl.startsWith(CARDSIGHT_IMAGE_PREFIX)
+      ? await fetchSentinelImageBytes(imageUrl, invokeFn)
+      : await fetchImageBytes(imageUrl, fetchFn);
     if (!bytes) {
       return;
     }
