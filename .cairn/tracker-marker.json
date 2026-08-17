@@ -231,6 +231,102 @@
       "assignee": "eventually-consistent-code",
       "state": "closed",
       "updatedAt": "2026-08-16T22:40:16Z"
+    },
+    "31": {
+      "title": "P6.7-T1: Tabs restructure + center Scan button + collection picker",
+      "bodyHash": "5c61bd1f368155b9",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-16T23:49:58Z"
+    },
+    "32": {
+      "title": "P6.7-T2: Dashboard screen — portfolio hero, vertical grid, recently cataloged",
+      "bodyHash": "d9da81457e76c7a1",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-16T23:55:23Z"
+    },
+    "33": {
+      "title": "P6.7-T3: Profile screen + Insights placeholder",
+      "bodyHash": "41c6c33209e224fb",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-16T23:54:41Z"
+    },
+    "34": {
+      "title": "P6.7-T4: Collection cover art — auto-cover on vault cards",
+      "bodyHash": "0db37531561804b4",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-16T23:54:44Z"
+    },
+    "35": {
+      "title": "P6.7-T5: Auto-save lookup images — adapter imageUrl → item photo on create",
+      "bodyHash": "24e5bd7f24c343a3",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-17T00:13:49Z"
+    },
+    "36": {
+      "title": "P6.7-T6: Type-ahead lookup on manual add — name field searches the vertical's adapter, pick-to-fill",
+      "bodyHash": "19c7173e780e8db1",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-17T00:28:17Z"
+    },
+    "37": {
+      "title": "Process defect: assistant asserted a nonexistent app capability during UAT guidance — told the user to use a \"manual/text entry path\" on the scan screen to look up the Griffey card, but scan.tsx's manual mode is barcode-digits-only (number-pad → handleBarcode). No text search existed anywhere in the app UI. Understand why and design a guard.",
+      "bodyHash": "e3b0c44298fc1c14",
+      "labels": [
+        "cairn:bug"
+      ],
+      "state": "closed",
+      "updatedAt": "2026-08-17T00:26:03Z"
+    },
+    "38": {
+      "title": "Type-ahead pick fills nothing — popover shows results for \"1989 Upper Deck Ken Griffey Jr\" but selecting an option populates no template fields and saves no image (phase 6.7 UAT, #36)",
+      "bodyHash": "e3b0c44298fc1c14",
+      "labels": [
+        "cairn:bug"
+      ],
+      "state": "closed",
+      "updatedAt": "2026-08-17T04:28:21Z"
+    },
+    "39": {
+      "title": "Backlog: community metadata datalake + LLM enrichment for no-API verticals",
+      "bodyHash": "f88f798518f31ba7",
+      "labels": [],
+      "state": "open",
+      "updatedAt": "2026-08-17T01:22:28Z"
+    },
+    "40": {
+      "title": "P6.7-T7: Item screen hero image — photo front and center, data below",
+      "bodyHash": "a65115003553dafc",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-17T01:35:58Z"
+    },
+    "41": {
+      "title": "P7-T0: TCGPriceLookup source — TCG lookups w/ market prices + public images",
+      "bodyHash": "e37239c76dfd8130",
+      "labels": [],
+      "assignee": "eventually-consistent-code",
+      "state": "closed",
+      "updatedAt": "2026-08-17T04:36:38Z"
+    },
+    "42": {
+      "title": "Backlog: photo appraisal — CardGrader.AI for cards + Claude-vision rubric grading for every vertical",
+      "bodyHash": "337fb5398ae37d0f",
+      "labels": [],
+      "state": "open",
+      "updatedAt": "2026-08-17T04:35:55Z"
     }
   },
   "phases": {
