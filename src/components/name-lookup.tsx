@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { FontFamily, Palette, Type } from '@/constants/theme';
+import { FontFamily, Palette, Spacing, Type } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { MetadataAdapter, MetadataResult } from '@/metadata';
 import {
@@ -152,18 +152,16 @@ export function NameLookupPopover({
 }
 
 const styles = StyleSheet.create({
-  // Hangs just below the field; the wrapper supplies position: relative.
+  // In normal layout flow directly under the field — an absolute overhang
+  // renders outside the anchor's frame and iOS refuses to deliver touches
+  // there (every row tap fell through to the dismiss backdrop). In-flow,
+  // the open list pushes the form down and taps land. trace-e5ba6226.
   popover: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
     marginTop: -8, // tuck under the field's own bottom margin
+    marginBottom: Spacing.four,
     borderRadius: 12,
     borderWidth: 1,
     overflow: 'hidden',
-    zIndex: 20,
-    elevation: 6,
   },
   row: {
     flexDirection: 'row',
