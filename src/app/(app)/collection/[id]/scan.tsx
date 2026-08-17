@@ -78,8 +78,8 @@ export default function ScanScreen() {
   // One lookup per scan session — CameraView fires repeatedly on a held frame.
   const lockRef = useRef(false);
 
-  const openForm = (name?: string, fields?: MetadataResult['fields']) => {
-    const prefill = encodeURIComponent(JSON.stringify({ name, customFields: fields }));
+  const openForm = (name?: string, fields?: MetadataResult['fields'], imageUrl?: string) => {
+    const prefill = encodeURIComponent(JSON.stringify({ name, customFields: fields, imageUrl }));
     router.replace(`/collection/${id}/new-item?prefill=${prefill}`);
   };
 
@@ -217,7 +217,10 @@ export default function ScanScreen() {
                 <ThemedText style={styles.matchLabel}>Match Found</ThemedText>
               }
               renderItem={({ item }) => (
-                <Pressable style={styles.resultRow} onPress={() => openForm(item.title, item.fields)}>
+                <Pressable
+                  style={styles.resultRow}
+                  onPress={() => openForm(item.title, item.fields, item.imageUrl)}
+                >
                   <ThemedText style={styles.resultTitle}>{item.title}</ThemedText>
                   <ThemedText themeColor="textSecondary" style={styles.resultDetail}>
                     {[item.subtitle, item.source].filter(Boolean).join(' · ')}
