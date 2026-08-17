@@ -19,9 +19,15 @@ import {
 import { ItemThumb } from '@/components/item-thumb';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { FontFamily, Spacing, Type } from '@/constants/theme';
+import { FontFamily, Palette, Spacing, Type } from '@/constants/theme';
 import { deleteCollection, parseCustomFields, renameCollection } from '@/db/crud';
-import { useCollection, useCollectionTags, useFilteredItems, useItems } from '@/db/hooks';
+import {
+  useCollection,
+  useCollectionTags,
+  useCollectionValueTotals,
+  useFilteredItems,
+  useItems,
+} from '@/db/hooks';
 import { DEFAULT_SORT, type ItemSort } from '@/db/query';
 import { useTheme } from '@/hooks/use-theme';
 import { centsToDisplay } from '@/lib/money';
@@ -50,6 +56,10 @@ export default function CollectionScreen() {
   // Unfiltered count for the "N of M" line.
   const { data: allItems } = useItems(id);
   const { data: tagRows } = useCollectionTags(id);
+  // Rolled-up worth for the header plaque, live as items change.
+  const { data: totalsRows } = useCollectionValueTotals(id);
+  const valueCents = totalsRows?.[0]?.value_cents ?? 0;
+  const costCents = totalsRows?.[0]?.cost_cents ?? 0;
 
   if (!collection) {
     return <ThemedView style={styles.container} />;
@@ -95,6 +105,31 @@ export default function CollectionScreen() {
                   {collection.vertical} · tap to rename
                 </ThemedText>
               </Pressable>
+            )}
+            {/* Value plaque — only once the collection is worth something;
+                no $0.00 brass for an unappraised shelf. */}
+            {valueCents > 0 && (
+              <View
+                style={StyleSheet.flatten([
+                  styles.valuePlaque,
+                  { backgroundColor: theme.surfaceRaised, borderColor: theme.hairline },
+                ])}
+              >
+                <ThemedText themeColor="textSecondary" style={Type.label}>
+                  Collection Value
+                </ThemedText>
+                <ThemedText style={styles.valueTotal}>
+                  {centsToDisplay(valueCents)}
+                </ThemedText>
+                {/* Cost basis + gain/loss, only when a cost was ever recorded. */}
+                {costCents > 0 && (
+                  <ThemedText themeColor="textSecondary" style={Type.data}>
+                    {`cost ${centsToDisplay(costCents)} · ${
+                      valueCents >= costCents ? '+' : '−'
+                    }${centsToDisplay(Math.abs(valueCents - costCents))}`}
+                  </ThemedText>
+                )}
+              </View>
             )}
             {/* Filter bar only earns its space once there is something to filter. */}
             {(allItems?.length ?? 0) > 0 && (
@@ -195,6 +230,23 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   list: { padding: Spacing.three },
   header: { marginBottom: Spacing.three },
+  // Brass-plaque treatment at collection scale — same 8px radius + hairline
+  // as the Dashboard hero, padding stepped down to keep list density.
+  valuePlaque: {
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: Spacing.three,
+    gap: Spacing.one,
+    marginTop: Spacing.three,
+    marginBottom: Spacing.three,
+  },
+  // The headline number — amber Geist semibold, one size under the hero.
+  valueTotal: {
+    fontFamily: FontFamily.sansSemiBold,
+    fontSize: 24,
+    lineHeight: 30,
+    color: Palette.amber,
+  },
   empty: { textAlign: 'center', marginTop: Spacing.five },
   // 8px card radius + 1px brass hairline per the Estate & Ember system.
   // Padding stepped down from four to three so the 60px thumb doesn't
